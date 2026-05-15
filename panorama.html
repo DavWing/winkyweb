@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>360° 全景圖預覽</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111;
+      color: #eee;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      user-select: none;
+    }
+
+    /* ── Upload Panel ── */
+    #upload-panel {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      background: #111;
+      z-index: 20;
+    }
+    #upload-panel h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: #fff;
+    }
+    #upload-panel p {
+      font-size: .9rem;
+      color: #888;
+      margin-top: -18px;
+      text-align: center;
+    }
+
+    .drop-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .drop-zone {
+      width: 260px;
+      height: 140px;
+      border: 2px dashed #444;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: #6fa3f5;
+      background: rgba(111,163,245,.08);
+    }
+    .drop-zone.loaded { border-style: solid; border-color: #4caf50; }
+    .drop-zone img.thumb {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: .55;
+      pointer-events: none;
+    }
+    .drop-zone .label {
+      position: relative;
+      z-index: 1;
+      font-size: .8rem;
+      color: #aaa;
+      text-align: center;
+      padding: 0 12px;
+    }
+    .drop-zone .icon { font-size: 2rem; position: relative; z-index: 1; }
+    .drop-zone input { display: none; }
+
+    #launch-btn {
+      padding: 12px 40px;
+      font-size: 1rem;
+      font-weight: 600;
+      background: #6fa3f5;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      opacity: .35;
+      pointer-events: none;
+      transition: opacity .2s, transform .1s;
+    }
+    #launch-btn.ready { opacity: 1; pointer-events: auto; }
+    #launch-btn.ready:hover { background: #88b8ff; transform: scale(1.03); }
+
+    .tip {
+      font-size: .78rem;
+      color: #555;
+      text-align: center;
+      max-width: 420px;
+      line-height: 1.6;
+    }
+
+    /* ── Viewer ── */
+    #viewer-wrap {
+      display: none;
+      position: fixed;
+      inset: 0;
+    }
+    #viewer-wrap.active { display: block; }
+    #three-canvas { display: block; width: 100%; height: 100%; }
+
+    /* ── HUD ── */
+    #hud {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0,0,0,.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 40px;
+      padding: 10px 20px;
+      z-index: 30;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .hud-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.25);
+      color: #eee;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: .8rem;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+      white-space: nowrap;
+    }
+    .hud-btn:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.5); }
+    .hud-btn.active { background: rgba(111,163,245,.3); border-color: #6fa3f5; color: #6fa3f5; }
+
+    .hud-sep { width: 1px; height: 20px; background: rgba(255,255,255,.15); }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .78rem;
+      color: #aaa;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 90px;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255,255,255,.2);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #6fa3f5;
+    }
+
+    /* ── Back btn ── */
+    #back-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,.15);
+      color: #eee;
+      border-radius: 8px;
+      padding: 7px 16px;
+      font-size: .82rem;
+      cursor: pointer;
+      z-index: 30;
+      transition: background .2s;
+      display: none;
+    }
+    #back-btn.visible { display: block; }
+    #back-btn:hover { background: rgba(255,255,255,.15); }
+
+    /* ── Overlap Overlay (stitch debug) ── */
+    #overlap-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .78rem;
+      color: #aaa;
+    }
+    #overlap-val { min-width: 28px; }
+
+    /* ── Loading spinner ── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 25;
+      display: none;
+    }
+    #loading.show { display: flex; }
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid rgba(255,255,255,.1);
+      border-top-color: #6fa3f5;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- Upload Panel -->
+<div id="upload-panel">
+  <h1>🌐 360° 全景圖預覽</h1>
+  <p>上傳兩張全景圖，組合成完整的 360° 環景瀏覽</p>
+
+  <div class="drop-row">
+    <div class="drop-zone" id="zone1" title="左半段全景圖">
+      <img class="thumb" id="thumb1" style="display:none" />
+      <span class="icon">📷</span>
+      <span class="label">左半段全景圖<br><small>點擊或拖曳上傳</small></span>
+      <input type="file" id="file1" accept="image/*" />
+    </div>
+    <div class="drop-zone" id="zone2" title="右半段全景圖">
+      <img class="thumb" id="thumb2" style="display:none" />
+      <span class="icon">📷</span>
+      <span class="label">右半段全景圖<br><small>點擊或拖曳上傳</small></span>
+      <input type="file" id="file2" accept="image/*" />
+    </div>
+  </div>
+
+  <button id="launch-btn">進入全景瀏覽 →</button>
+
+  <p class="tip">
+    拖曳滑鼠環顧四周 · 滾輪縮放 · 支援觸控<br>
+    可在瀏覽器中調整重疊區域以消除接縫
+  </p>
+</div>
+
+<!-- Loading -->
+<div id="loading"><div class="spinner"></div></div>
+
+<!-- Viewer -->
+<div id="viewer-wrap">
+  <canvas id="three-canvas"></canvas>
+</div>
+
+<!-- Back button -->
+<button id="back-btn">← 重新上傳</button>
+
+<!-- HUD controls -->
+<div id="hud" style="display:none">
+  <button class="hud-btn" id="btn-rotate">⟳ 自動旋轉</button>
+  <div class="hud-sep"></div>
+  <div class="slider-wrap">
+    <span>旋轉速度</span>
+    <input type="range" id="speed-slider" min="1" max="20" value="5" />
+  </div>
+  <div class="hud-sep"></div>
+  <div id="overlap-wrap">
+    <span>重疊修正</span>
+    <input type="range" id="overlap-slider" min="0" max="50" value="8" />
+    <span id="overlap-val">8%</span>
+  </div>
+  <div class="hud-sep"></div>
+  <button class="hud-btn" id="btn-fullscreen">⛶ 全螢幕</button>
+  <button class="hud-btn" id="btn-reset">↺ 重置視角</button>
+</div>
+
+<!-- Three.js r128 -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const state = {
+  img1: null, img2: null,
+  autoRotate: false,
+  overlapPct: 8,
+  rotSpeed: 0.0008,
+};
+
+// ── DOM refs ───────────────────────────────────────────────────────────────
+const uploadPanel = document.getElementById('upload-panel');
+const viewerWrap  = document.getElementById('viewer-wrap');
+const threeCanvas = document.getElementById('three-canvas');
+const launchBtn   = document.getElementById('launch-btn');
+const backBtn     = document.getElementById('back-btn');
+const hud         = document.getElementById('hud');
+const loadingEl   = document.getElementById('loading');
+
+const zone1 = document.getElementById('zone1');
+const zone2 = document.getElementById('zone2');
+const file1 = document.getElementById('file1');
+const file2 = document.getElementById('file2');
+const thumb1 = document.getElementById('thumb1');
+const thumb2 = document.getElementById('thumb2');
+
+const btnRotate     = document.getElementById('btn-rotate');
+const btnFullscreen = document.getElementById('btn-fullscreen');
+const btnReset      = document.getElementById('btn-reset');
+const speedSlider   = document.getElementById('speed-slider');
+const overlapSlider = document.getElementById('overlap-slider');
+const overlapVal    = document.getElementById('overlap-val');
+
+// ── Image upload helpers ──────────────────────────────────────────────────
+function loadFile(file, imgEl, thumbEl, zoneEl) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        imgEl.value = img;
+        thumbEl.src = e.target.result;
+        thumbEl.style.display = 'block';
+        zoneEl.classList.add('loaded');
+        checkReady();
+        resolve(img);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// imgEl is simulated by a wrapper object
+const imgStore = { img1: null, img2: null };
+
+function setupZone(zoneEl, fileInput, key, thumbEl) {
+  zoneEl.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) handleImageFile(e.target.files[0], key, thumbEl, zoneEl);
+  });
+
+  zoneEl.addEventListener('dragover', (e) => { e.preventDefault(); zoneEl.classList.add('drag-over'); });
+  zoneEl.addEventListener('dragleave', () => zoneEl.classList.remove('drag-over'));
+  zoneEl.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zoneEl.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handleImageFile(file, key, thumbEl, zoneEl);
+  });
+}
+
+function handleImageFile(file, key, thumbEl, zoneEl) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      imgStore[key] = img;
+      thumbEl.src = e.target.result;
+      thumbEl.style.display = 'block';
+      zoneEl.classList.add('loaded');
+      checkReady();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function checkReady() {
+  if (imgStore.img1 && imgStore.img2) {
+    launchBtn.classList.add('ready');
+  }
+}
+
+setupZone(zone1, file1, 'img1', thumb1);
+setupZone(zone2, file2, 'img2', thumb2);
+
+// ── Stitch two panoramic images into one canvas texture ───────────────────
+function stitchImages(img1, img2, overlapPct) {
+  const h = Math.max(img1.height, img2.height);
+
+  // How many pixels to trim from the right edge of img1 / left edge of img2
+  const overlapPx1 = Math.round(img1.width * overlapPct / 100);
+  const overlapPx2 = Math.round(img2.width * overlapPct / 100);
+
+  const totalW = (img1.width - overlapPx1) + (img2.width - overlapPx2);
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = totalW;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+
+  // Draw img1 (trim right overlap)
+  ctx.drawImage(img1, 0, 0, img1.width - overlapPx1, img1.height,
+                      0, 0, img1.width - overlapPx1, h);
+
+  // Draw img2 (trim left overlap)
+  ctx.drawImage(img2, overlapPx2, 0, img2.width - overlapPx2, img2.height,
+                      img1.width - overlapPx1, 0, img2.width - overlapPx2, h);
+
+  return canvas;
+}
+
+// ── Three.js scene ────────────────────────────────────────────────────────
+let renderer, scene, camera, controls, sphereMesh;
+let animFrameId = null;
+
+function initThree() {
+  const w = window.innerWidth, h = window.innerHeight;
+
+  renderer = new THREE.WebGLRenderer({ canvas: threeCanvas, antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(w, h);
+
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 2000);
+  camera.position.set(0, 0, 0.01);
+
+  controls = new THREE.OrbitControls(camera, threeCanvas);
+  controls.enableZoom    = true;
+  controls.enablePan     = false;
+  controls.zoomSpeed     = 0.8;
+  controls.rotateSpeed   = -0.4; // inverted for inside-sphere feel
+  controls.minDistance   = 0.01;
+  controls.maxDistance   = 0.01;
+  controls.minPolarAngle = 0.3;
+  controls.maxPolarAngle = Math.PI - 0.3;
+
+  // Sphere geometry (inside-facing)
+  const geo = new THREE.SphereGeometry(500, 80, 40);
+  geo.scale(-1, 1, 1); // flip normals inward
+
+  const stitched = stitchImages(imgStore.img1, imgStore.img2, state.overlapPct);
+  const texture = new THREE.CanvasTexture(stitched);
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+
+  const mat = new THREE.MeshBasicMaterial({ map: texture });
+  sphereMesh = new THREE.Mesh(geo, mat);
+  scene.add(sphereMesh);
+
+  window.addEventListener('resize', onResize);
+  animate();
+}
+
+function onResize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+
+function animate() {
+  animFrameId = requestAnimationFrame(animate);
+  if (state.autoRotate) {
+    sphereMesh.rotation.y += state.rotSpeed;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+function updateTexture() {
+  if (!sphereMesh) return;
+  const stitched = stitchImages(imgStore.img1, imgStore.img2, state.overlapPct);
+  const texture = new THREE.CanvasTexture(stitched);
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  sphereMesh.material.map.dispose();
+  sphereMesh.material.map = texture;
+  sphereMesh.material.needsUpdate = true;
+}
+
+function resetView() {
+  if (!camera || !controls) return;
+  controls.reset();
+  sphereMesh.rotation.y = 0;
+}
+
+// ── Launch ────────────────────────────────────────────────────────────────
+launchBtn.addEventListener('click', () => {
+  if (!imgStore.img1 || !imgStore.img2) return;
+
+  loadingEl.classList.add('show');
+  uploadPanel.style.display = 'none';
+
+  // Small delay so spinner renders before heavy canvas ops
+  setTimeout(() => {
+    viewerWrap.classList.add('active');
+    initThree();
+    loadingEl.classList.remove('show');
+    backBtn.classList.add('visible');
+    hud.style.display = 'flex';
+  }, 80);
+});
+
+// ── Back ──────────────────────────────────────────────────────────────────
+backBtn.addEventListener('click', () => {
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  if (renderer) { renderer.dispose(); renderer = null; }
+  scene = camera = controls = sphereMesh = null;
+
+  viewerWrap.classList.remove('active');
+  hud.style.display = 'none';
+  backBtn.classList.remove('visible');
+  uploadPanel.style.display = 'flex';
+});
+
+// ── HUD controls ──────────────────────────────────────────────────────────
+btnRotate.addEventListener('click', () => {
+  state.autoRotate = !state.autoRotate;
+  btnRotate.classList.toggle('active', state.autoRotate);
+});
+
+speedSlider.addEventListener('input', () => {
+  state.rotSpeed = speedSlider.value * 0.00015;
+});
+
+overlapSlider.addEventListener('input', () => {
+  state.overlapPct = parseInt(overlapSlider.value);
+  overlapVal.textContent = state.overlapPct + '%';
+  updateTexture();
+});
+
+btnReset.addEventListener('click', resetView);
+
+btnFullscreen.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    btnFullscreen.textContent = '✕ 離開全螢幕';
+    btnFullscreen.classList.add('active');
+  } else {
+    document.exitFullscreen();
+    btnFullscreen.textContent = '⛶ 全螢幕';
+    btnFullscreen.classList.remove('active');
+  }
+});
+
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) {
+    btnFullscreen.textContent = '⛶ 全螢幕';
+    btnFullscreen.classList.remove('active');
+  }
+});
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (!renderer) return;
+  if (e.key === 'r' || e.key === 'R') btnRotate.click();
+  if (e.key === 'Escape') { if (document.fullscreenElement) document.exitFullscreen(); }
+  if (e.key === ' ') { e.preventDefault(); resetView(); }
+});
+</script>
+</body>
+</html>
