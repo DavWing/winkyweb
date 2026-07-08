@@ -2,3 +2,9 @@ _site
 .sass-cache
 .jekyll-metadata
 Gemfile.lock
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+.DS_Store
