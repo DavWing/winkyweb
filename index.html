@@ -446,6 +446,125 @@
   .hidden {
     display: none;
   }
+
+  .loan-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .loan-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #E4E1D8;
+    border-radius: 3px;
+    background: #fff;
+    color: #33322F;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .loan-btn:hover {
+    background: #F4F2EC;
+    border-color: #DEDACC;
+  }
+
+  .loan-btn.delete {
+    color: #B5573F;
+    border-color: #B5573F;
+  }
+
+  .loan-btn.delete:hover {
+    background: #FBF3EF;
+  }
+
+  .edit-form {
+    background: #fff;
+    border: 1px solid #E4E1D8;
+    border-radius: 3px;
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 12px;
+    color: #7A776D;
+    margin-bottom: 4px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #E4E1D8;
+    border-radius: 3px;
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  select.form-input {
+    cursor: pointer;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .form-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #33322F;
+    border-radius: 3px;
+    background: #33322F;
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+
+  .form-btn:hover {
+    background: #54524C;
+  }
+
+  .form-btn.cancel {
+    background: #fff;
+    color: #33322F;
+  }
+
+  .form-btn.cancel:hover {
+    background: #F4F2EC;
+  }
+
+  .add-loan-btn {
+    margin-bottom: 20px;
+    padding: 10px 16px;
+    background: #33322F;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .add-loan-btn:hover {
+    background: #54524C;
+  }
 </style>
 </head>
 <body>
@@ -527,6 +646,8 @@
 </div>
 
 <script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
   const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
   const WEEKDAYS = ['週日','週一','週二','週三','週四','週五','週六'];
 
@@ -535,6 +656,9 @@
   const OVERDUE = '#B5573F';
   const OVERDUE_WASH = '#FBF3EF';
   const PAID = '#7C8B6F';
+
+  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://nrltzseaaqoxzzsydxbl.supabase.co';
+  const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY || '';
 
   function fmtMoney(n) {
     return '$' + Math.round(n).toLocaleString('en-US');
@@ -550,7 +674,46 @@
       this.baseMonth = new Date(2026, 6, 1);
       this.monthOffset = 0;
       this.selectedDate = null;
+      this.loans = [];
 
+      this.supabase = SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+      this.setupEventListeners();
+      this.loadLoans();
+    }
+
+    async loadLoans() {
+      if (this.supabase) {
+        try {
+          const { data, error } = await this.supabase
+            .from('loans')
+            .select('*');
+
+          if (error) throw error;
+
+          this.loans = data.map(loan => ({
+            id: loan.id,
+            name: loan.name,
+            lender: loan.lender,
+            category: loan.category,
+            date: new Date(loan.due_date),
+            amount: loan.amount,
+            balance: loan.balance,
+            apr: loan.apr + '%',
+            status: loan.status
+          }));
+        } catch (err) {
+          console.log('Supabase not configured, using sample data:', err.message);
+          this.loadSampleData();
+        }
+      } else {
+        this.loadSampleData();
+      }
+
+      this.render();
+    }
+
+    loadSampleData() {
       this.loans = [
         { id: 'l1', name: '房屋貸款', lender: '國泰世華銀行', category: '房貸', date: new Date(2026, 6, 1), amount: 1850, balance: 248000, apr: '6.2%', status: 'paid' },
         { id: 'l2', name: '中信信用卡', lender: '中國信託', category: '信用卡', date: new Date(2026, 6, 3), amount: 420, balance: 2180, apr: '24.99%', status: 'paid' },
@@ -559,9 +722,6 @@
         { id: 'l5', name: '台新信用卡', lender: '台新銀行', category: '信用卡', date: new Date(2026, 6, 20), amount: 180, balance: 1050, apr: '22.49%', status: 'unpaid' },
         { id: 'l6', name: '學生貸款', lender: '教育部就學貸款', category: '學生貸款', date: new Date(2026, 6, 28), amount: 310, balance: 18300, apr: '4.5%', status: 'unpaid' }
       ];
-
-      this.setupEventListeners();
-      this.render();
     }
 
     setupEventListeners() {
@@ -745,6 +905,10 @@
               <div class="loan-detail-text">${l.lender}</div>
             </div>
           </div>
+          <div class="loan-actions">
+            <button class="loan-btn" onclick="app.editLoan('${l.id}')">編輯</button>
+            <button class="loan-btn delete" onclick="app.deleteLoan('${l.id}')">刪除</button>
+          </div>
         `;
         modalLoans.appendChild(card);
       });
@@ -752,9 +916,131 @@
       this.selectedDate = dateStr;
       document.getElementById('modalOverlay').classList.remove('hidden');
     }
+
+    editLoan(loanId) {
+      const loan = this.loans.find(l => l.id === loanId);
+      if (!loan) return;
+
+      const aprStr = typeof loan.apr === 'string' ? loan.apr.replace('%', '') : loan.apr;
+
+      const form = document.createElement('div');
+      form.className = 'edit-form';
+      form.innerHTML = `
+        <div class="form-group">
+          <label class="form-label">貸款名稱</label>
+          <input type="text" class="form-input" id="editName" value="${loan.name}">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">貸款機構</label>
+            <input type="text" class="form-input" id="editLender" value="${loan.lender}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">分類</label>
+            <input type="text" class="form-input" id="editCategory" value="${loan.category}">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">應繳金額</label>
+            <input type="number" class="form-input" id="editAmount" value="${loan.amount}" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">尚欠餘額</label>
+            <input type="number" class="form-input" id="editBalance" value="${loan.balance}" step="0.01">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">利率(%)</label>
+            <input type="number" class="form-input" id="editApr" value="${aprStr}" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">到期日</label>
+            <input type="date" class="form-input" id="editDueDate" value="${loan.date.getFullYear()}-${String(loan.date.getMonth() + 1).padStart(2, '0')}-${String(loan.date.getDate()).padStart(2, '0')}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">狀態</label>
+          <select class="form-input" id="editStatus">
+            <option value="paid" ${loan.status === 'paid' ? 'selected' : ''}>已繳</option>
+            <option value="unpaid" ${loan.status === 'unpaid' ? 'selected' : ''}>待繳</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button class="form-btn" onclick="app.saveLoan('${loanId}')">保存</button>
+          <button class="form-btn cancel" onclick="app.render()">取消</button>
+        </div>
+      `;
+
+      const modalLoans = document.getElementById('modalLoans');
+      modalLoans.innerHTML = '';
+      modalLoans.appendChild(form);
+    }
+
+    async saveLoan(loanId) {
+      const name = document.getElementById('editName').value;
+      const lender = document.getElementById('editLender').value;
+      const category = document.getElementById('editCategory').value;
+      const amount = parseFloat(document.getElementById('editAmount').value);
+      const balance = parseFloat(document.getElementById('editBalance').value);
+      const apr = parseFloat(document.getElementById('editApr').value);
+      const due_date = document.getElementById('editDueDate').value;
+      const status = document.getElementById('editStatus').value;
+
+      if (this.supabase) {
+        try {
+          const { error } = await this.supabase
+            .from('loans')
+            .update({ name, lender, category, amount, balance, apr, due_date, status })
+            .eq('id', loanId);
+
+          if (error) throw error;
+          await this.loadLoans();
+          this.render();
+        } catch (err) {
+          alert('儲存失敗: ' + err.message);
+        }
+      } else {
+        const loan = this.loans.find(l => l.id === loanId);
+        if (loan) {
+          loan.name = name;
+          loan.lender = lender;
+          loan.category = category;
+          loan.amount = amount;
+          loan.balance = balance;
+          loan.apr = apr + '%';
+          loan.date = new Date(due_date);
+          loan.status = status;
+        }
+        this.render();
+      }
+    }
+
+    async deleteLoan(loanId) {
+      if (!confirm('確定刪除此貸款嗎？')) return;
+
+      if (this.supabase) {
+        try {
+          const { error } = await this.supabase
+            .from('loans')
+            .delete()
+            .eq('id', loanId);
+
+          if (error) throw error;
+          await this.loadLoans();
+          this.render();
+        } catch (err) {
+          alert('刪除失敗: ' + err.message);
+        }
+      } else {
+        this.loans = this.loans.filter(l => l.id !== loanId);
+        this.render();
+      }
+    }
   }
 
-  new LoanCalendar();
+  window.app = new LoanCalendar();
 </script>
 </body>
 </html>
