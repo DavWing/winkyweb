@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wings Family Finance - 貸款月曆</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      color: #33322F;
+      background: #FAFAF7;
+      margin: 0;
+    }
+
+    .container {
+      min-height: 100vh;
+      width: 100%;
+      padding: 56px 64px 80px;
+      position: relative;
+    }
+
+    .decorative-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: solid #DEDACC;
+      pointer-events: none;
+    }
+
+    .circle-1 {
+      top: 44px;
+      right: 64px;
+      width: 130px;
+      height: 130px;
+      border-width: 1.5px;
+      opacity: 0.7;
+    }
+
+    .circle-2 {
+      top: 74px;
+      right: 94px;
+      width: 70px;
+      height: 70px;
+      border-width: 1px;
+      opacity: 0.5;
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      gap: 24px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .header-content h1 {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 42px;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: 0.01em;
+    }
+
+    .header-content p {
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      color: #7A776D;
+      margin-bottom: 10px;
+    }
+
+    .header-content .subtitle {
+      margin: 10px 0 0;
+      font-size: 16px;
+      color: #7A776D;
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #fff;
+      border: 1px solid #E4E1D8;
+      border-radius: 999px;
+      padding: 6px 6px 6px 22px;
+    }
+
+    .month-nav button {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid #E4E1D8;
+      background: #fff;
+      color: #33322F;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .month-nav button:hover {
+      background: #F4F2EC;
+    }
+
+    .month-label {
+      font-size: 18px;
+      font-weight: 700;
+      min-width: 132px;
+      text-align: center;
+      font-family: 'Noto Serif TC', serif;
+    }
+
+    .today-btn {
+      margin-left: 8px;
+      border: 1px solid #33322F;
+      background: #33322F;
+      color: #FAFAF7;
+      font-size: 14px;
+      padding: 9px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .today-btn:hover {
+      background: #54524C;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border: 1px solid #E4E1D8;
+      border-radius: 3px;
+      padding: 28px 32px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #7A776D;
+      margin-bottom: 12px;
+    }
+
+    .stat-value {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .stat-count {
+      font-size: 14px;
+      color: #7A776D;
+      margin-top: 8px;
+    }
+
+    .payment-card {
+      background: #fff;
+      border: 1px solid #E4E1D8;
+      border-radius: 3px;
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .payment-info h3 {
+      font-size: 21px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .payment-label {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .payment-detail {
+      font-size: 14px;
+      color: #7A776D;
+      margin-top: 6px;
+    }
+
+    .payment-amount {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 26px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .calendar-wrapper {
+      background: #fff;
+      border: 1px solid #E4E1D8;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      border-bottom: 1px solid #E4E1D8;
+      background: #FAFAF7;
+    }
+
+    .weekday {
+      padding: 16px 0;
+      text-align: center;
+      font-size: 14px;
+      color: #7A776D;
+      font-weight: 500;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .calendar-cell {
+      padding: 14px 12px;
+      min-height: 116px;
+      border-right: 1px solid #EFECE3;
+      border-bottom: 1px solid #EFECE3;
+      cursor: pointer;
+      background: #FFFFFF;
+      position: relative;
+      transition: background 0.2s;
+    }
+
+    .calendar-cell:hover {
+      background: #F6F4EE;
+    }
+
+    .calendar-cell.today {
+      box-shadow: inset 0 0 0 2px #33322F;
+    }
+
+    .calendar-cell.other-month {
+      background: #FCFBF8;
+    }
+
+    .calendar-cell.has-overdue {
+      background: #FBF3EF;
+    }
+
+    .day-number {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .today-badge {
+      font-size: 10px;
+      background: #33322F;
+      color: #FAFAF7;
+      padding: 2px 7px;
+      border-radius: 999px;
+    }
+
+    .day-amount {
+      margin-top: 10px;
+      font-family: 'Noto Serif TC', serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .loan-tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px;
+      font-size: 12.5px;
+      color: #635F54;
+    }
+
+    .loan-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .loan-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-top: 20px;
+      font-size: 13.5px;
+      color: #7A776D;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(51, 50, 47, 0.32);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 24px;
+    }
+
+    .modal-overlay.hidden {
+      display: none;
+    }
+
+    .modal {
+      background: #FDFCF8;
+      border-radius: 2px;
+      width: 440px;
+      max-width: 100%;
+      max-height: 86vh;
+      overflow-y: auto;
+      padding: 36px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
+      border-top: 3px solid #33322F;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .modal-date {
+      font-size: 14px;
+      color: #7A776D;
+      margin-bottom: 6px;
+    }
+
+    .modal-date-value {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid #E4E1D8;
+      background: #fff;
+      color: #33322F;
+      cursor: pointer;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loan-item {
+      border: 1px solid #E4E1D8;
+      border-radius: 2px;
+      padding: 20px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .loan-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-right: 30px;
+    }
+
+    .loan-name-modal {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .loan-status {
+      font-size: 12px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+
+    .loan-category {
+      font-size: 13.5px;
+      color: #7A776D;
+      margin-bottom: 16px;
+    }
+
+    .loan-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .detail-field {
+      font-size: 12.5px;
+      color: #7A776D;
+      margin-bottom: 4px;
+    }
+
+    .detail-value {
+      font-family: 'Noto Serif TC', serif;
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .detail-value.text {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 15px;
+    }
+
+    .loan-delete {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid #E4E1D8;
+      background: #fff;
+      color: #B5573F;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loan-toggle {
+      width: 100%;
+      border: 1px solid #E4E1D8;
+      background: #fff;
+      color: #33322F;
+      font-size: 13.5px;
+      padding: 9px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .loan-toggle:hover {
+      background: #F6F4EE;
+    }
+
+    .add-loan-section {
+      border: 1px dashed #D8D4C7;
+      border-radius: 2px;
+      padding: 20px;
+      margin-top: 14px;
+    }
+
+    .add-loan-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .form-grid input {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 14px;
+      padding: 10px 12px;
+      border: 1px solid #E4E1D8;
+      border-radius: 2px;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+
+    .form-grid input:focus {
+      outline: none;
+      border-color: #33322F;
+    }
+
+    .form-grid input.full-width {
+      grid-column: 1 / 3;
+    }
+
+    .add-btn {
+      width: 100%;
+      border: none;
+      background: #33322F;
+      color: #FAFAF7;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 11px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .add-btn:hover {
+      background: #54524C;
+    }
+
+    @media (max-width: 1024px) {
+      .container {
+        padding: 40px 32px 60px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 24px 16px 40px;
+      }
+
+      .header-content h1 {
+        font-size: 32px;
+      }
+
+      .month-nav {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .calendar-cell {
+        min-height: 80px;
+        padding: 8px 6px;
+      }
+
+      .day-amount {
+        font-size: 14px;
+      }
+
+      .loan-tag {
+        font-size: 11px;
+      }
+
+      .legend {
+        flex-wrap: wrap;
+      }
+
+      .payment-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .payment-amount {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="decorative-circle circle-1"></div>
+    <div class="decorative-circle circle-2"></div>
+
+    <div class="header">
+      <div class="header-content">
+        <p>貸款管理・債務總覽</p>
+        <h1>貸款月曆</h1>
+        <p class="subtitle">點擊到期日，查看貸款詳情</p>
+      </div>
+      <div class="month-nav">
+        <button id="prevBtn" onclick="app.prevMonth()">‹</button>
+        <div class="month-label" id="monthLabel"></div>
+        <button id="nextBtn" onclick="app.nextMonth()">›</button>
+        <button class="today-btn" onclick="app.goToday()">今天</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">尚欠總額</div>
+        <div class="stat-value" id="totalDebt">$0</div>
+        <div class="stat-count" id="loanCount">共 0 筆帳戶</div>
+      </div>
+      <div class="payment-card">
+        <div class="payment-info">
+          <div class="payment-label" id="paymentLabel">已全部繳清</div>
+          <h3 id="paymentName">目前無待繳款項</h3>
+          <div class="payment-detail" id="paymentDetail">本月沒有排定的還款</div>
+        </div>
+        <div class="payment-amount" id="paymentAmount">—</div>
+      </div>
+    </div>
+
+    <div class="calendar-wrapper">
+      <div class="calendar-header">
+        <div class="weekday">日</div>
+        <div class="weekday">一</div>
+        <div class="weekday">二</div>
+        <div class="weekday">三</div>
+        <div class="weekday">四</div>
+        <div class="weekday">五</div>
+        <div class="weekday">六</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #B5573F;"></div>
+        逾期
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #9C9C94;"></div>
+        待繳
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: #7C8B6F;"></div>
+        已繳
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="modal">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <div class="modal-date">到期日</div>
+          <div class="modal-date-value" id="modalDate"></div>
+        </div>
+        <button class="modal-close" onclick="app.closeModal()">✕</button>
+      </div>
+
+      <div id="loansContainer"></div>
+
+      <div class="add-loan-section">
+        <div class="add-loan-title">新增貸款到此日期</div>
+        <div class="form-grid">
+          <input type="text" id="draftName" placeholder="貸款名稱" class="full-width">
+          <input type="text" id="draftLender" placeholder="貸款機構">
+          <input type="text" id="draftCategory" placeholder="類別（如：信用卡）">
+          <input type="number" id="draftAmount" placeholder="應繳金額">
+          <input type="number" id="draftBalance" placeholder="尚欠餘額">
+          <input type="text" id="draftApr" placeholder="利率（如：12%）" class="full-width">
+        </div>
+        <button class="add-btn" onclick="app.addLoan()">新增貸款</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+    const WEEKDAYS = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+
+    const INK = '#33322F';
+    const MUTED = '#9C9C94';
+    const OVERDUE = '#B5573F';
+    const OVERDUE_WASH = '#FBF3EF';
+    const PAID = '#7C8B6F';
+
+    function fmtMoney(n) {
+      return '$' + Math.round(n).toLocaleString('en-US');
+    }
+
+    function sameDay(a, b) {
+      return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    }
+
+    const app = {
+      today: new Date(2026, 6, 11),
+      baseMonth: new Date(2026, 6, 1),
+      monthOffset: 0,
+      selectedKey: null,
+      loans: [],
+      nextId: 1,
+
+      prevMonth() {
+        this.monthOffset--;
+        this.render();
+      },
+
+      nextMonth() {
+        this.monthOffset++;
+        this.render();
+      },
+
+      goToday() {
+        this.monthOffset = 0;
+        this.selectedKey = null;
+        this.render();
+      },
+
+      closeModal() {
+        this.selectedKey = null;
+        this.clearDraft();
+        this.render();
+      },
+
+      clearDraft() {
+        document.getElementById('draftName').value = '';
+        document.getElementById('draftLender').value = '';
+        document.getElementById('draftCategory').value = '';
+        document.getElementById('draftAmount').value = '';
+        document.getElementById('draftBalance').value = '';
+        document.getElementById('draftApr').value = '';
+      },
+
+      addLoan() {
+        if (!this.selectedKey) return;
+        const [y, m, dd] = this.selectedKey.split('-').map(Number);
+        const name = document.getElementById('draftName').value.trim();
+        const lender = document.getElementById('draftLender').value.trim();
+        const category = document.getElementById('draftCategory').value.trim();
+        const amount = parseFloat(document.getElementById('draftAmount').value) || 0;
+        const balance = parseFloat(document.getElementById('draftBalance').value) || 0;
+        const apr = document.getElementById('draftApr').value.trim();
+
+        if (!name) {
+          alert('請輸入貸款名稱');
+          return;
+        }
+
+        this.loans.push({
+          id: 'l' + (this.nextId++),
+          name: name || '未命名貸款',
+          lender: lender || '—',
+          category: category || '其他',
+          date: new Date(y, m, dd),
+          amount,
+          balance,
+          apr: apr || '—',
+          status: 'unpaid'
+        });
+
+        this.clearDraft();
+        this.render();
+      },
+
+      deleteLoan(id) {
+        this.loans = this.loans.filter(l => l.id !== id);
+        this.render();
+      },
+
+      toggleStatus(id) {
+        const loan = this.loans.find(l => l.id === id);
+        if (loan) {
+          loan.status = loan.status === 'paid' ? 'unpaid' : 'paid';
+        }
+        this.render();
+      },
+
+      getLoanStatusInfo(loan) {
+        if (loan.status === 'paid') return { label: '已繳', dot: PAID, textColor: PAID };
+        if (loan.date < this.today) return { label: '逾期', dot: OVERDUE, textColor: OVERDUE };
+        return { label: '待繳', dot: MUTED, textColor: INK };
+      },
+
+      render() {
+        const viewDate = new Date(this.baseMonth.getFullYear(), this.baseMonth.getMonth() + this.monthOffset, 1);
+        const viewYear = viewDate.getFullYear();
+        const viewMonth = viewDate.getMonth();
+
+        const gridStart = new Date(viewYear, viewMonth, 1 - new Date(viewYear, viewMonth, 1).getDay());
+
+        // Update month label
+        document.getElementById('monthLabel').textContent = viewYear + '年' + MONTHS[viewMonth];
+
+        // Generate calendar cells
+        const calendarGrid = document.getElementById('calendarGrid');
+        calendarGrid.innerHTML = '';
+
+        for (let i = 0; i < 42; i++) {
+          const d = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
+          const inMonth = d.getMonth() === viewMonth;
+          const isToday = sameDay(d, this.today);
+          const dayLoans = this.loans.filter(l => sameDay(l.date, d));
+          const hasLoans = dayLoans.length > 0;
+          const hasOverdue = dayLoans.some(l => l.status !== 'paid' && l.date < this.today);
+          const totalDue = dayLoans.reduce((sum, l) => sum + l.amount, 0);
+          const key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+
+          const cell = document.createElement('div');
+          cell.className = 'calendar-cell';
+          if (!inMonth) cell.classList.add('other-month');
+          if (hasOverdue) cell.classList.add('has-overdue');
+          if (isToday) cell.classList.add('today');
+
+          let html = `<div class="day-number" style="color: ${inMonth ? (isToday ? INK : MUTED) : '#D8D4C7'}">
+            <span>${d.getDate()}</span>
+            ${isToday ? '<span class="today-badge">今天</span>' : ''}
+          </div>`;
+
+          if (hasLoans) {
+            html += `<div class="day-amount" style="color: ${hasOverdue ? OVERDUE : INK}">${fmtMoney(totalDue)}</div>`;
+            dayLoans.forEach(l => {
+              const statusInfo = this.getLoanStatusInfo(l);
+              html += `<div class="loan-tag">
+                <div class="loan-dot" style="background: ${statusInfo.dot}"></div>
+                <span class="loan-name">${l.name}</span>
+              </div>`;
+            });
+          }
+
+          cell.innerHTML = html;
+          cell.onclick = () => {
+            this.selectedKey = key;
+            this.render();
+          };
+
+          calendarGrid.appendChild(cell);
+        }
+
+        // Update stats
+        const totalDebt = this.loans.reduce((sum, l) => sum + l.balance, 0);
+        document.getElementById('totalDebt').textContent = fmtMoney(totalDebt);
+        document.getElementById('loanCount').textContent = `共 ${this.loans.length} 筆帳戶`;
+
+        // Update next payment
+        const unpaid = this.loans.filter(l => l.status !== 'paid');
+        const overdueLoans = unpaid.filter(l => l.date < this.today).sort((a, b) => a.date - b.date);
+        const upcomingLoans = unpaid.filter(l => l.date >= this.today).sort((a, b) => a.date - b.date);
+
+        let featured = null, paymentLabel = '已全部繳清', paymentAccent = PAID;
+        if (overdueLoans.length) {
+          featured = overdueLoans[0];
+          paymentLabel = '逾期未繳';
+          paymentAccent = OVERDUE;
+        } else if (upcomingLoans.length) {
+          featured = upcomingLoans[0];
+          paymentLabel = '下次還款';
+          paymentAccent = INK;
+        }
+
+        const paymentCard = document.querySelector('.payment-card');
+        paymentCard.style.borderLeftColor = paymentAccent;
+        paymentCard.style.borderLeftWidth = '3px';
+
+        document.getElementById('paymentLabel').textContent = paymentLabel;
+        document.getElementById('paymentLabel').style.color = paymentAccent;
+        document.getElementById('paymentName').textContent = featured ? featured.name : '目前無待繳款項';
+        document.getElementById('paymentDetail').textContent = featured ?
+          ((featured.date.getMonth() + 1) + '月' + featured.date.getDate() + '日・' + featured.lender) :
+          '本月沒有排定的還款';
+        document.getElementById('paymentAmount').textContent = featured ? fmtMoney(featured.amount) : '—';
+        document.getElementById('paymentAmount').style.color = paymentAccent;
+
+        // Update modal
+        const modal = document.getElementById('modal');
+        if (this.selectedKey) {
+          const [y, m, dd] = this.selectedKey.split('-').map(Number);
+          const sd = new Date(y, m, dd);
+          document.getElementById('modalDate').textContent = (m + 1) + '月' + dd + '日・' + WEEKDAYS[sd.getDay()];
+
+          const loansContainer = document.getElementById('loansContainer');
+          loansContainer.innerHTML = '';
+
+          const modalLoans = this.loans.filter(l => sameDay(l.date, sd));
+          modalLoans.forEach(l => {
+            const statusInfo = this.getLoanStatusInfo(l);
+            const loanDiv = document.createElement('div');
+            loanDiv.className = 'loan-item';
+            loanDiv.innerHTML = `
+              <button class="loan-delete" onclick="app.deleteLoan('${l.id}')">✕</button>
+              <div class="loan-item-header">
+                <div class="loan-name-modal">${l.name}</div>
+                <div class="loan-status" style="background: ${l.status === 'paid' ? '#EEF1EA' : (l.date < app.today ? '#F7E8E3' : '#F1F0EB')}; color: ${statusInfo.textColor};">
+                  ${statusInfo.label}
+                </div>
+              </div>
+              <div class="loan-category">${l.category}</div>
+              <div class="loan-details">
+                <div>
+                  <div class="detail-field">應繳金額</div>
+                  <div class="detail-value">${fmtMoney(l.amount)}</div>
+                </div>
+                <div>
+                  <div class="detail-field">尚欠餘額</div>
+                  <div class="detail-value">${fmtMoney(l.balance)}</div>
+                </div>
+                <div>
+                  <div class="detail-field">利率</div>
+                  <div class="detail-value text">${l.apr}</div>
+                </div>
+                <div>
+                  <div class="detail-field">貸款機構</div>
+                  <div class="detail-value text">${l.lender}</div>
+                </div>
+              </div>
+              <button class="loan-toggle" onclick="app.toggleStatus('${l.id}')">
+                ${l.status === 'paid' ? '標記為未繳' : '標記為已繳'}
+              </button>
+            `;
+            loansContainer.appendChild(loanDiv);
+          });
+
+          modal.classList.remove('hidden');
+          modal.onclick = () => this.closeModal();
+        } else {
+          modal.classList.add('hidden');
+        }
+      }
+    };
+
+    // Initial render
+    app.render();
+  </script>
+</body>
+</html>

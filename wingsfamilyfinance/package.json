@@ -1,0 +1,13 @@
+{
+  "name": "wingsfamilyfinance",
+  "version": "1.0.0",
+  "description": "Loan calendar and debt management app",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 3000",
+    "build": "echo 'No build needed for static site'"
+  },
+  "keywords": ["loan", "calendar", "finance", "debt"],
+  "author": "WingsFamily",
+  "license": "MIT"
+}
