@@ -1,0 +1,724 @@
+<title>Otaru Minpaku Ledger</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&family=Inter:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    color-scheme: light;
+    --paper: #F3ECDD;
+    --surface: #FAF5EA;
+    --surface-2: #EAE0C9;
+    --ink: #2B2318;
+    --text: #453A2A;
+    --muted: #71634E;
+    --accent: #AD7C2C;
+    --accent-ink: #FCF6E9;
+    --accent-2: #5C7A52;
+    --line: #DDD0B0;
+    --bad: #AE3B2C;
+    --shadow: 0 1px 2px rgba(60,48,26,0.05), 0 6px 18px rgba(60,48,26,0.06);
+  }
+  /* Deliberately single-theme: this page commits to a warm washi-paper
+     light look, so it does not follow the viewer's dark-mode preference. */
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .display {
+    font-family: 'Source Serif 4', Georgia, serif;
+    color: var(--ink);
+    text-wrap: balance;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .mono, .num {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  a { color: var(--accent); }
+  ::selection { background: var(--accent); color: var(--accent-ink); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- shell ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    padding: 14px clamp(16px, 4vw, 40px);
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand {
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .brand .mark {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--ink);
+  }
+  .brand .sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  nav.tabs {
+    display: flex; gap: 4px;
+    background: var(--surface-2);
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+  }
+  nav.tabs button {
+    font: inherit;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 0.86rem;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+  }
+  nav.tabs button[aria-selected="true"] {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    nav.tabs button { transition: none; }
+  }
+
+  main { max-width: 980px; margin: 0 auto; padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 40px) 100px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .hero {
+    display: flex; flex-direction: column; gap: 10px;
+    padding-bottom: 28px; margin-bottom: 32px;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .hero h1 { font-size: clamp(1.6rem, 3.4vw, 2.15rem); margin: 0; }
+  .hero p.lede { color: var(--text); max-width: 68ch; margin: 4px 0 0; font-size: 1rem; }
+
+  .fact-strip {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 1px; background: var(--line);
+    border: 1px solid var(--line); border-radius: 13px; overflow: hidden;
+    margin-top: 18px;
+  }
+  .fact-strip div {
+    background: var(--surface); padding: 12px 14px;
+  }
+  .fact-strip .k { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em; }
+  .fact-strip .v { font-family: 'IBM Plex Mono', monospace; font-size: 0.9rem; color: var(--ink); margin-top: 3px; }
+
+  /* ---------- steps page ---------- */
+  .phase { margin-bottom: 40px; }
+  .phase-head {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .phase-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem; font-weight: 600;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 3px 10px;
+    flex-shrink: 0;
+  }
+  .phase-head h2 { font-size: 1.2rem; margin: 0; }
+  .phase-head .phase-en { font-size: 0.76rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+
+  ol.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  ol.steps li {
+    display: grid; grid-template-columns: 34px 1fr; gap: 14px;
+    padding: 13px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  ol.steps li + li { border-top: none; }
+  ol.steps li:first-child { border-radius: 13px 13px 0 0; }
+  ol.steps li:last-child { border-radius: 0 0 13px 13px; }
+  ol.steps li:only-child { border-radius: 13px; }
+  .step-i {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding-top: 1px;
+  }
+  .step-body strong { color: var(--ink); font-weight: 700; }
+  .step-body .note {
+    display: block; margin-top: 4px;
+    font-size: 0.86rem; color: var(--muted);
+  }
+  .tag {
+    display: inline-block; font-size: 0.66rem; font-family: 'IBM Plex Mono', monospace;
+    padding: 1px 7px; border-radius: 5px; margin-left: 8px;
+    background: color-mix(in srgb, var(--bad) 16%, transparent);
+    color: var(--bad); font-weight: 600; letter-spacing: 0.02em;
+    vertical-align: 1px;
+  }
+  .tag.req {
+    background: color-mix(in srgb, var(--accent-2) 20%, transparent);
+    color: var(--accent-2);
+  }
+
+  /* ---------- due-diligence checklist (before-purchase page) ---------- */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-top: 16px; padding: 12px 14px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 13px;
+    font-size: 0.82rem; color: var(--muted);
+  }
+  .legend b { color: var(--ink); }
+  .imp {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.66rem; font-weight: 700;
+    padding: 2px 9px; border-radius: 6px; letter-spacing: 0.02em; white-space: nowrap;
+  }
+  .imp-high { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
+  .imp-mid  { background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--accent); }
+  .imp-low  { background: color-mix(in srgb, var(--muted) 16%, transparent); color: var(--muted); }
+
+  ul.chk { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  ul.chk li {
+    display: grid; grid-template-columns: 30px 1fr; gap: 14px;
+    padding: 14px; background: var(--surface); border: 1px solid var(--line);
+  }
+  ul.chk li + li { border-top: none; }
+  ul.chk li:first-child { border-radius: 13px 13px 0 0; }
+  ul.chk li:last-child { border-radius: 0 0 13px 13px; }
+  ul.chk li:only-child { border-radius: 13px; }
+  .chk-i { font-family: 'IBM Plex Mono', monospace; color: var(--muted); font-size: 0.8rem; padding-top: 2px; }
+  .chk-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-bottom: 5px; }
+  .chk-top strong { color: var(--ink); font-weight: 700; font-size: 0.96rem; }
+  .chk-why { font-size: 0.86rem; color: var(--text); }
+  .chk-why b { color: var(--ink); }
+  .chk-general { font-size: 0.86rem; color: var(--muted); margin-top: 3px; display: block; }
+
+  /* ---------- finance page ---------- */
+  .stat-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px; margin-bottom: 36px;
+  }
+  .stat {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 18px 16px;
+  }
+  .stat .k { font-size: 0.76rem; color: var(--muted); }
+  .stat .v { font-family: 'IBM Plex Mono', monospace; font-size: 1.4rem; color: var(--ink); font-weight: 600; margin-top: 6px; }
+  .stat .v2 { font-family: 'IBM Plex Mono', monospace; font-size: 0.9rem; color: var(--accent); margin-top: 2px; }
+
+  section.block { margin-bottom: 44px; }
+  section.block > h2 { font-size: 1.15rem; margin: 0 0 4px; }
+  section.block > .sub { color: var(--muted); font-size: 0.88rem; margin: 0 0 18px; max-width: 72ch; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 13px; }
+  table { width: 100%; border-collapse: collapse; min-width: 560px; background: var(--surface); }
+  th, td { padding: 11px 14px; text-align: left; font-size: 0.88rem; border-bottom: 1px solid var(--line); }
+  thead th {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.05em;
+    color: var(--muted); text-transform: uppercase; background: var(--surface-2);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.jpy, td.hkd { font-family: 'IBM Plex Mono', monospace; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.hkd { color: var(--muted); font-size: 0.84rem; }
+  tr.total td { font-weight: 700; color: var(--ink); border-top: 2px solid var(--line); }
+  tr.total td.jpy, tr.total td.hkd { font-weight: 700; }
+
+  /* ---------- statement table (180-day scenario comparison) ---------- */
+  table.stmt { min-width: 700px; }
+  table.stmt th, table.stmt td { border-bottom: 1px solid var(--line); }
+  table.stmt thead th { text-transform: none; font-size: 0.8rem; }
+  table.stmt thead th.item-col { text-align: left; }
+  table.stmt thead th.scn-col { text-align: right; color: var(--ink); font-weight: 700; }
+  table.stmt thead th.scn-col .en { display: block; font-weight: 400; color: var(--muted); font-size: 0.66rem; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+  table.stmt thead th.scn-col.mid { background: color-mix(in srgb, var(--accent) 10%, var(--surface-2)); }
+  table.stmt td.item { color: var(--text); white-space: nowrap; }
+  table.stmt td.amt-cell { text-align: right; }
+  table.stmt td.amt-cell.mid { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  table.stmt tr.assump td.item { color: var(--muted); font-size: 0.84rem; }
+  table.stmt tr.assump td.amt-cell { font-size: 0.84rem; color: var(--muted); }
+  table.stmt tr.rev td { border-top: 2px solid var(--line); padding-top: 13px; }
+  table.stmt tr.net td { border-top: 3px double var(--ink); padding-top: 14px; }
+  table.stmt tr.net td.item { font-weight: 700; color: var(--ink); }
+  table.stmt tr.yieldrow td { border-bottom: none; padding-top: 4px; }
+  table.stmt tr.yieldrow td.item { font-size: 0.82rem; color: var(--muted); }
+  .amt { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+  .amt-y { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .amt-h { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.78rem; }
+  .amt.neg .amt-y, .amt.neg .amt-h { color: var(--bad); }
+  .amt.pos .amt-y { color: var(--accent-2); font-size: 1.05rem; font-weight: 700; }
+  .amt.pos .amt-h { color: var(--accent-2); opacity: 0.75; }
+  .pct { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--ink); font-size: 1rem; }
+
+  .callout {
+    background: var(--surface-2); border-left: 3px solid var(--accent);
+    border-radius: 0 13px 13px 0; padding: 14px 16px; font-size: 0.86rem; color: var(--text);
+  }
+  .callout strong { color: var(--ink); }
+
+  footer {
+    max-width: 980px; margin: 0 auto; padding: 30px clamp(16px, 4vw, 40px) 60px;
+    color: var(--muted); font-size: 0.78rem; border-top: 1px solid var(--line);
+  }
+  footer p { max-width: 78ch; }
+</style>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="mark">Otaru Minpaku Ledger</span>
+    <span class="sub">Ishiyama-chō · Minpaku Launch Plan</span>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Pages">
+    <button role="tab" aria-selected="true" aria-controls="page-before" id="tab-before" onclick="showPage('before')">Before Purchase</button>
+    <button role="tab" aria-selected="false" aria-controls="page-during" id="tab-during" onclick="showPage('during')">Closing &amp; Operations</button>
+    <button role="tab" aria-selected="false" aria-controls="page-finance" id="tab-finance" onclick="showPage('finance')">Financial Model</button>
+  </nav>
+</div>
+
+<main>
+
+  <!-- ============ BEFORE-PURCHASE PAGE ============ -->
+  <section class="page active" id="page-before" role="tabpanel" aria-labelledby="tab-before">
+    <div class="hero">
+      <span class="eyebrow">House-Selection Due Diligence</span>
+      <h1>30-Point Due-Diligence Checklist</h1>
+      <p class="lede">Everything to verify before signing, grouped into four categories: building condition, land, cold-climate specifics, and minpaku fit. Each item carries a "180-Day Minpaku Importance" rating — how much it would affect your ability to run, or run well, a 180-day Airbnb if it turns out to be a problem, not just general house-buying risk.</p>
+      <div class="fact-strip">
+        <div><div class="k">Property</div><div class="v">Ishiyama-chō detached house (resale)</div></div>
+        <div><div class="k">Purchase price</div><div class="v">¥1,100,000</div></div>
+        <div><div class="k">Land / Building</div><div class="v">102.9㎡ / 107.46㎡</div></div>
+        <div><div class="k">Layout</div><div class="v">5LDK · 2-story wood-frame</div></div>
+        <div><div class="k">Built</div><div class="v">May 1979 (pre-1981 code)</div></div>
+      </div>
+      <div class="legend">
+        <span><span class="imp imp-high">HIGH</span> = <b>Directly affects</b> whether you can file the notification / pass the fire inspection, or creates major safety or financial risk under unattended management</span>
+        <span><span class="imp imp-mid">MED</span> = <b>Affects renovation budget or operating cost</b>, not a hard regulatory gate</span>
+        <span><span class="imp imp-low">LOW</span> = Worth noting for any house purchase, but <b>minor impact</b> on 180-day minpaku, or already confirmed fine for this property</span>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">01 — 03</span>
+        <h2>A. Building Age &amp; Seismic Standard</h2>
+        <span class="phase-en">Age &amp; seismic</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">01</span><div><div class="chk-top"><strong>June 1981 (Shōwa 56) seismic-code cutoff</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Confirm whether the "building confirmation application" date falls before this cutoff. This property was built in 1979, so it falls under the old ("pre-1981") seismic standard.</div><span class="chk-general">Directly affects fire/earthquake insurance terms and premiums, and is the first step in deciding whether a seismic diagnosis is needed.</span></div></li>
+        <li><span class="chk-i">02</span><div><div class="chk-top"><strong>Seismic diagnosis report</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">Ask the seller whether one was already done — request it directly if so. If not, budget roughly ¥150,000–300,000 for one.</div><span class="chk-general">Doesn't affect the 180-day notification itself, but affects insurance terms and buyer confidence at resale.</span></div></li>
+        <li><span class="chk-i">03</span><div><div class="chk-top"><strong>Cross-checking unauthorized additions</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Houses over 40 years old often have unapproved additions (an added bathroom, an enclosed balcony). Check that the registered floor area matches the as-built area.</div><span class="chk-general">A mismatch creates discrepancies in the floor area declared for the fire inspection and the notification, and may require legalizing the addition first.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">04 — 07</span>
+        <h2>B. Building Legal Documents</h2>
+        <span class="phase-en">Legal documents</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">04</span><div><div class="chk-top"><strong>Building confirmation certificate (kenchiku kakunin)</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Confirms whether the original construction went through building-confirmation approval — the first document proving the house is a "legal structure."</div><span class="chk-general">Without it, any future renovation or extension becomes difficult, and it complicates the fire-inspection application.</span></div></li>
+        <li><span class="chk-i">05</span><div><div class="chk-top"><strong>Completion inspection certificate (kensa-zumi-shō)</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Confirms whether the government issued a completion certificate after construction. Older Japanese houses — especially rural ones from less strictly enforced eras — commonly lack this. Its absence doesn't mean the building is illegal, but it slows down approvals.</div><span class="chk-general">One of the most common causes of delay in obtaining the Fire Code Compliance Notice, which is a required attachment for the minpaku notification.</span></div></li>
+        <li><span class="chk-i">06</span><div><div class="chk-top"><strong>"Existing non-conforming" building status</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">Built before the current Building Standards Act took effect; legal to keep using as-is, but a "large-scale renovation" can trigger a requirement to bring the whole building up to current code.</div><span class="chk-general">Mainly pushes up the renovation budget — not a direct block to the minpaku application itself.</span></div></li>
+        <li><span class="chk-i">07</span><div><div class="chk-top"><strong>Illegal construction (unregistered additions)</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">If unregistered illegal additions are found, they must be legalized or removed before proceeding further.</div><span class="chk-general">If the affected rooms fall within the fire-inspection scope, you cannot pass the Fire Code Compliance Notice until they're legalized.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">08 — 11</span>
+        <h2>C. Land &amp; Boundaries</h2>
+        <span class="phase-en">Land &amp; boundaries</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">08</span><div><div class="chk-top"><strong>Boundary confirmation (kakutei survey)</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">The seller should provide a "kakutei sokuryō-zu" (confirmed survey map) signed off by neighboring landowners, not just an estimated "genkyō sokuryō-zu" (as-is survey).</div><span class="chk-general">Doesn't directly affect the 180-day notification, but unclear boundaries make snow-fall and drainage disputes harder to resolve, and affect future extensions.</span></div></li>
+        <li><span class="chk-i">09</span><div><div class="chk-top"><strong>Encroachment (eaves, walls crossing the line)</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">Check whether eaves, pipes, or walls cross onto the neighboring lot, or vice versa — common in older, dense residential areas.</div><span class="chk-general">May cause disputes when renovating the exterior or adding a deck later, but isn't itself an obstacle to the minpaku application.</span></div></li>
+        <li><span class="chk-i">10</span><div><div class="chk-top"><strong>Road-frontage requirement / "unrebuildable" status</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Confirm the lot fronts a road at least 4m wide, with at least 2m of frontage (Building Standards Act Articles 42 &amp; 43). Failing this makes it a "saikenchiku-fuka" (cannot-rebuild) property — nationally, this rate (41.6%) is notably higher among vacant houses than occupied ones (33.6%).</div><span class="chk-general">Doesn't affect the current building's notification, but (a) severely impacts resale/exit value, and (b) a too-narrow road may limit fire-truck access, a real factor in the fire inspection.</span></div></li>
+        <li><span class="chk-i">11</span><div><div class="chk-top"><strong>Private-road burden</strong><span class="imp imp-low">LOW</span></div><div class="chk-why">This listing already states "no private-road burden," but confirm ownership and maintenance responsibility for the access road regardless.</div><span class="chk-general">Already confirmed as a public road here — a favorable factor. Shared private roads are common on rural properties, so watch for this on other listings.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">12 — 17</span>
+        <h2>D. Snow &amp; Cold-Climate Specifics</h2>
+        <span class="phase-en">Snow &amp; cold-climate</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">12</span><div><div class="chk-top"><strong>Roof design: snow-shedding vs. non-shedding</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">A sloped roof sheds accumulated snow onto the ground or even the neighboring lot. Japanese courts have held owners liable for damage from falling snow, particularly when snow guards weren't installed or snow wasn't cleared regularly.</div><span class="chk-general">For an unattended, self-check-in Airbnb, the legal and insurance risk of falling snow injuring a guest or neighbor is severe — prioritize properties already converted to a non-shedding roof, or fitted with snow guards.</span></div></li>
+        <li><span class="chk-i">13</span><div><div class="chk-top"><strong>Snow-clearing responsibility &amp; winter access</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Confirm whether the road in front of the property is cleared by the city or privately; the property sits on a hillside in Ishiyama-chō, so assess whether your management company/cleaners can actually reach it after heavy snowfall.</div><span class="chk-general">Directly affects occupancy and emergency response — if winter access is genuinely difficult, that portion of your 180 days may be effectively unusable.</span></div></li>
+        <li><span class="chk-i">14</span><div><div class="chk-top"><strong>Insulation &amp; double-glazing (nijū-mado)</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Confirm whether insulation retrofitting has been done and whether windows are double-glazed. Poor insulation drives heating costs way up and directly hurts the guest experience.</div><span class="chk-general">One of the most common sources of bad reviews for winter Hokkaido minpaku, and a direct driver of operating costs.</span></div></li>
+        <li><span class="chk-i">15</span><div><div class="chk-top"><strong>Freeze-prevention drain valve &amp; pipe insulation depth</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Confirm the freeze-prevention depth of water and hot-water pipes, and whether a "mizunuki" (drain valve) is fitted to prevent burst pipes while the property is unattended.</div><span class="chk-general">A burst pipe during an unattended period is one of the most common, and most expensive, accidents — a particular risk for a remotely managed, overseas owner.</span></div></li>
+        <li><span class="chk-i">16</span><div><div class="chk-top"><strong>Kerosene tank condition</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">Hokkaido homes commonly heat with kerosene/oil; check the tank and lines for aging or leaks.</div><span class="chk-general">Affects the renovation budget and whether the heating system needs replacing — not a regulatory issue.</span></div></li>
+        <li><span class="chk-i">17</span><div><div class="chk-top"><strong>Snow-melting equipment / pedestrian path clearing</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">Check whether the driveway and walkway have snow-melting lines, or require manual clearing.</div><span class="chk-general">This property already has no parking, so this item matters less here, but it still affects whether guests can safely walk to the front door.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">18 — 20</span>
+        <h2>E. Utilities &amp; Infrastructure</h2>
+        <span class="phase-en">Utilities</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">18</span><div><div class="chk-top"><strong>Electrical capacity (amperage)</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">Older houses often have low electrical capacity (e.g., 20–30A); running multiple heaters, an induction cooktop, and a washer/dryer at once may require an upgrade to 40–60A.</div><span class="chk-general">Affects the renovation budget — not a regulatory requirement.</span></div></li>
+        <li><span class="chk-i">19</span><div><div class="chk-top"><strong>Public sewer vs. septic tank</strong><span class="imp imp-low">LOW</span></div><div class="chk-why">Already confirmed as public water supply and public sewer for this property — no need to worry about private septic-tank maintenance.</div><span class="chk-general">Already confirmed as public infrastructure — a favorable factor.</span></div></li>
+        <li><span class="chk-i">20</span><div><div class="chk-top"><strong>Network coverage (fiber / mobile)</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Smart locks and unattended self-check-in depend heavily on stable Wi-Fi and mobile signal; hillside areas can have weaker reception — test on-site before buying.</div><span class="chk-general">If the network is unreliable, the smart lock and real-time Airbnb messaging fail outright — this is the lifeline of an unattended operating model.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">21 — 24</span>
+        <h2>F. Minpaku Operational Fit</h2>
+        <span class="phase-en">Minpaku fit</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">21</span><div><div class="chk-top"><strong>School 100m-radius ordinance check</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Hokkaido's prefectural ordinance bans minpaku operation on weekdays (school days) within 100m of an elementary/junior-high school gate. Get written confirmation from the Hokkaido minpaku portal or Otaru's city-planning department — don't rely on a walking-time estimate.</div><span class="chk-general">Directly determines how many days you can operate — a precondition for the 180-day model to work at all.</span></div></li>
+        <li><span class="chk-i">22</span><div><div class="chk-top"><strong>Zoning district and building/floor-area ratios</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">Confirmed as Category 1 Residential, 60%/200%, which generally permits minpaku use — but get written confirmation from Otaru's city-planning division that this specific parcel has no additional restrictions.</div><span class="chk-general">Already a good compliance chance, but written confirmation avoids disputes later.</span></div></li>
+        <li><span class="chk-i">23</span><div><div class="chk-top"><strong>Neighbor relations &amp; neighborhood association (chōnaikai)</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">The most common operational risk for minpaku is neighbor complaints (noise, trash, guest vehicles). Before buying, understand the neighborhood's makeup (mostly long-term resident families?) and whether the chōnaikai has voiced any opinion on minpaku.</div><span class="chk-general">Neighbor complaints are the most common cause of administrative guidance — or even shutdown — after a minpaku notification is filed.</span></div></li>
+        <li><span class="chk-i">24</span><div><div class="chk-top"><strong>Preliminary fire-inspection feasibility assessment</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Commission a fire-safety company for a preliminary assessment of whether the existing layout, stairs, and windows can meet minpaku fire standards, or whether major work (like adding a second escape route) is needed.</div><span class="chk-general">If a second escape route is required, it substantially raises the renovation budget and delays opening.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">25 — 28</span>
+        <h2>G. Physical Condition Inspection</h2>
+        <span class="phase-en">Physical condition</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">25</span><div><div class="chk-top"><strong>Roof/ceiling leaks</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Check the ceiling and attic for water-staining, especially since the eave drainage system carries the heaviest load during snowmelt.</div><span class="chk-general">Undetected leaks lead to structural and mold problems and directly affect the renovation budget.</span></div></li>
+        <li><span class="chk-i">26</span><div><div class="chk-top"><strong>Foundation cracks &amp; tilting</strong><span class="imp imp-high">HIGH</span></div><div class="chk-why">Uneven settling is common in 44-year-old wood-frame houses; have an inspector check the main walls and foundation.</div><span class="chk-general">Structural problems are the single largest swing factor in the renovation budget, and directly concern guest safety.</span></div></li>
+        <li><span class="chk-i">27</span><div><div class="chk-top"><strong>Termites &amp; wood rot</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">Hokkaido's cold climate means lower termite risk than Honshu, but still check the subfloor and wood structure for rot caused by leaks or poor ventilation.</div><span class="chk-general">Lower incidence in Hokkaido, but still worth having an inspector check.</span></div></li>
+        <li><span class="chk-i">28</span><div><div class="chk-top"><strong>Asbestos-containing materials</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">Pre-1980s construction commonly used asbestos-containing materials (ceilings, exterior walls); demolition during renovation must be handled per regulation.</div><span class="chk-general">Doesn't affect current living safety, but the compliant handling cost during renovation should be budgeted in advance.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">29 — 30</span>
+        <h2>H. Financial &amp; Subsidy Opportunities</h2>
+        <span class="phase-en">Subsidies</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">29</span><div><div class="chk-top"><strong>Vacant-house bank (akiya bank) registration</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">Confirm whether the property is registered on Otaru's or Hokkaido's "akiya bank" — some municipalities offer renovation subsidies for properties bought through it.</div><span class="chk-general">A potential rebate opportunity on renovation cost — worth asking Otaru City about before buying.</span></div></li>
+        <li><span class="chk-i">30</span><div><div class="chk-top"><strong>Municipal renovation subsidy programs</strong><span class="imp imp-mid">MED</span></div><div class="chk-why">Check separately with Otaru City and Hokkaido for current energy-efficiency/seismic-retrofit subsidy programs for older houses — some insulation work and seismic reinforcement may qualify for funding.</div><span class="chk-general">Can directly reduce the single largest uncertainty in the renovation budget.</span></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ DURING-PURCHASE, RENOVATION & OPERATIONS PAGE ============ -->
+  <section class="page" id="page-during" role="tabpanel" aria-labelledby="tab-during">
+    <div class="hero">
+      <span class="eyebrow">Purchase, Renovation &amp; Operations</span>
+      <h1>Contract to Launch: 15 Steps</h1>
+      <p class="lede">Once you've picked a property and completed the due diligence on the previous page, this page covers everything from signing and closing, through renovation compliance and filing, to annual ongoing-operation requirements. Tags mark steps that arise specifically because the owner is a non-resident buyer.</p>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">01 — 05</span>
+        <h2>Purchase &amp; Registration</h2>
+        <span class="phase-en">Purchase &amp; registration</span>
+      </div>
+      <ol class="steps">
+        <li><span class="step-i">01</span><div class="step-body"><strong>Sign the purchase agreement</strong> — Pay the deposit, confirm the closing date.</div></li>
+        <li><span class="step-i">02</span><div class="step-body"><strong>Apply for a signature certificate</strong><span class="tag">Overseas buyer</span><span class="note">Visit the Consulate-General of Japan in Hong Kong to obtain a signature certificate in place of a Japanese registered-seal certificate; also prepare the substitute residence-proof document.</span></div></li>
+        <li><span class="step-i">03</span><div class="step-body"><strong>Register a domestic contact address</strong><span class="tag">Overseas buyer</span><span class="note">Since April 2024, non-resident foreign buyers must declare a domestic contact address at registration — usually handled by the judicial scrivener's office.</span></div></li>
+        <li><span class="step-i">04</span><div class="step-body"><strong>Complete title registration via a judicial scrivener</strong> — Within 20 days of closing, a Bank of Japan FEFTA report must be filed.</div></li>
+        <li><span class="step-i">05</span><div class="step-body"><strong>Pay the registration tax, real-estate acquisition tax, and stamp duty</strong></div></li>
+      </ol>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">06 — 09</span>
+        <h2>Renovation &amp; Fire Compliance</h2>
+        <span class="phase-en">Renovation &amp; fire compliance</span>
+      </div>
+      <ol class="steps">
+        <li><span class="step-i">06</span><div class="step-body"><strong>Get quotes from 3+ renovation contractors</strong> — Scope: insulation retrofit (essential for Hokkaido winters), partial electrical/plumbing work, kitchen/bath renovation.</div></li>
+        <li><span class="step-i">07</span><div class="step-body"><strong>Install fire equipment to minpaku standard</strong> — Smoke alarms, fire extinguishers, emergency lighting, exit signage.</div></li>
+        <li><span class="step-i">08</span><div class="step-body"><strong>Apply for a fire inspection with the Otaru Fire Department</strong><span class="note">Must obtain the fire-equipment installation notice — a required document for the minpaku notification.</span></div></li>
+        <li><span class="step-i">09</span><div class="step-body"><strong>Finish the renovation and fit out</strong> — Furniture and appliances, smart lock (required for unattended self-check-in), Wi-Fi.</div></li>
+      </ol>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">10 — 12</span>
+        <h2>Notification &amp; Launch</h2>
+        <span class="phase-en">Notification &amp; launch</span>
+      </div>
+      <ol class="steps">
+        <li><span class="step-i">10</span><div class="step-body"><strong>File the Minpaku Business Notification with Hokkaido Prefecture</strong> — Get the notification number; it must appear on every Airbnb / Booking.com listing.</div></li>
+        <li><span class="step-i">11</span><div class="step-body"><strong>Appoint a licensed minpaku management operator</strong><span class="tag req">Legally required</span><span class="note">Because the owner doesn't live near the property, the law requires appointing a licensed management operator — this can be the same company as your cleaning/operations manager.</span></div></li>
+        <li><span class="step-i">12</span><div class="step-body"><strong>Appoint a tax administrator</strong><span class="tag">Overseas buyer</span><span class="note">Non-residents must appoint a tax administrator in Japan to file annual Japanese income tax on their behalf.</span></div></li>
+      </ol>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">13 — 15</span>
+        <h2>Ongoing Operations</h2>
+        <span class="phase-en">Ongoing operations</span>
+      </div>
+      <ol class="steps">
+        <li><span class="step-i">13</span><div class="step-body"><strong>File the guest register report every two months</strong> — Submitted to Hokkaido Prefecture, recording guest count and nationality.</div></li>
+        <li><span class="step-i">14</span><div class="step-body"><strong>File Japanese non-resident income tax annually</strong> — Via your tax administrator.</div></li>
+        <li><span class="step-i">15</span><div class="step-body"><strong>Review the management-fee statement and the 180-day cap annually</strong><span class="note">Track days actually used to avoid exceeding the statutory 180-day/year cap for minpaku.</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ FINANCE PAGE ============ -->
+  <section class="page" id="page-finance" role="tabpanel" aria-labelledby="tab-finance">
+    <div class="hero">
+      <span class="eyebrow">Financial Model</span>
+      <h1>Budget, Cost &amp; 180-Day Return Model</h1>
+      <p class="lede">All amounts are in Japanese yen (¥), with Canadian dollars (C$) as a secondary conversion, at the mid-market rate of <span class="mono">¥1 ≈ C$0.008684</span> (C$1 ≈ ¥115.2) as of August 31, 2026. For reference only — use the actual bank rate at the time of the transaction.</p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat">
+        <div class="k">Purchase price</div>
+        <div class="v">¥1,100,000</div>
+        <div class="v2">≈ C$9,552</div>
+      </div>
+      <div class="stat">
+        <div class="k">Est. total investment (closing + basic reno)</div>
+        <div class="v">¥4,230,000</div>
+        <div class="v2">≈ C$36,733</div>
+      </div>
+      <div class="stat">
+        <div class="k">180-day scenario · moderate-case net return</div>
+        <div class="v">¥2,695,052</div>
+        <div class="v2">≈ C$23,404/yr</div>
+      </div>
+      <div class="stat">
+        <div class="k">Moderate-case return rate</div>
+        <div class="v">63.7%</div>
+        <div class="v2">Net return ÷ total investment</div>
+      </div>
+    </div>
+
+    <section class="block">
+      <h2>1. Closing Costs</h2>
+      <p class="sub">Although the sticker price is only ¥1,100,000, the judicial-scrivener and agent fees don't scale down proportionally — so they end up a far larger share of the deal than in a typical property transaction.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>Note</th><th>JPY</th><th>CAD (approx.)</th></tr></thead>
+          <tbody>
+            <tr><td>Purchase price</td><td>Ishiyama-chō 5LDK older house</td><td class="jpy">¥1,100,000</td><td class="hkd">C$9,552</td></tr>
+            <tr><td>Brokerage fee</td><td>Low-value-property exemption, capped at ¥330,000 (incl. tax)</td><td class="jpy">¥0–330,000</td><td class="hkd">C$0–2,866</td></tr>
+            <tr><td>Registration tax + acquisition tax</td><td>Depends on the actual assessed-value certificate</td><td class="jpy">¥20,000–100,000</td><td class="hkd">C$174–868</td></tr>
+            <tr><td>Judicial scrivener fee</td><td>Flat regardless of price</td><td class="jpy">¥70,000–100,000</td><td class="hkd">C$608–868</td></tr>
+            <tr><td>Stamp duty</td><td>Within the reduced-rate period</td><td class="jpy">¥1,000</td><td class="hkd">C$9</td></tr>
+            <tr><td>Signature certificate (HK consulate)</td><td>Replaces the seal certificate, plus notarization</td><td class="jpy">¥5,000–20,000</td><td class="hkd">C$43–174</td></tr>
+            <tr><td>Domestic contact registration</td><td>Mandatory since April 2024</td><td class="jpy">¥10,000–30,000</td><td class="hkd">C$87–261</td></tr>
+            <tr class="total"><td>Total at closing</td><td>Purchase price + fees above</td><td class="jpy">¥1,300,000–1,700,000</td><td class="hkd">C$11,289–14,763</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>2. Renovation &amp; Compliance Cost</h2>
+      <p class="sub">Adjusted to match your house-selection strategy: only considering properties that don't need major work after inspection, so a "full renovation" scenario is no longer modeled. Below is the complete breakdown for "basic renovation," with furniture and appliances assumed to be sourced mainly via Taobao and freighted to Hokkaido.</p>
+
+      <div class="callout" style="margin-bottom:18px;">
+        <strong>Fire equipment can't be skipped — but the scope is much smaller than it sounds.</strong> The minpaku notification must include a Fire Code Compliance Notice — that's a legal requirement, and it's <b>unrelated to the 180-day/year cap</b> (the 180 days only limits operating days, not whether fire compliance is needed). That said, for a small "owner-absent" single-family property, the actual requirement is typically just residential smoke alarms, fire extinguishers, and basic exit lighting — nowhere near the automatic-alarm/sprinkler systems required of a commercial simple-lodging license. That cost is already folded into "Basic building work" below, and it's modest.
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Basic building work</th><th>Note</th><th>JPY</th><th>CAD (approx.)</th></tr></thead>
+          <tbody>
+            <tr><td>Insulation retrofit</td><td>Simple exterior wall / attic insulation</td><td class="jpy">¥800,000</td><td class="hkd">C$6,947</td></tr>
+            <tr><td>Double-glazing (nijū-mado)</td><td>Inner-sash retrofit on ~8–10 main rooms &amp; living area — cheaper than full window replacement</td><td class="jpy">¥400,000</td><td class="hkd">C$3,474</td></tr>
+            <tr><td>Basic electrical/plumbing inspection &amp; spot repairs</td><td>Not a full rewire — only aging sections</td><td class="jpy">¥400,000</td><td class="hkd">C$3,474</td></tr>
+            <tr><td>Fire equipment</td><td>Residential smoke alarms + extinguishers + basic exit lighting (small owner-absent scale)</td><td class="jpy">¥180,000</td><td class="hkd">C$1,563</td></tr>
+            <tr><td>Smart lock &amp; basic security</td><td>Required for unattended self-check-in</td><td class="jpy">¥50,000</td><td class="hkd">C$434</td></tr>
+            <tr><td>Heating system inspection &amp; basic repair</td><td>Kerosene tank and lines</td><td class="jpy">¥150,000</td><td class="hkd">C$1,303</td></tr>
+            <tr><td>General painting &amp; minor patching</td><td></td><td class="jpy">¥150,000</td><td class="hkd">C$1,303</td></tr>
+            <tr class="total"><td>Building-work subtotal</td><td></td><td class="jpy">¥2,130,000</td><td class="hkd">C$18,497</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap" style="margin-top:14px;">
+        <table>
+          <thead><tr><th>Furniture &amp; appliances (Taobao)</th><th>Note</th><th>JPY</th><th>CAD (approx.)</th></tr></thead>
+          <tbody>
+            <tr><td>Bed frames &amp; mattresses (×3)</td><td>For private bedrooms</td><td class="jpy">¥90,000</td><td class="hkd">C$782</td></tr>
+            <tr><td>Fabric sofa</td><td>Living room</td><td class="jpy">¥35,000</td><td class="hkd">C$304</td></tr>
+            <tr><td>Dining table with 6 chairs</td><td></td><td class="jpy">¥40,000</td><td class="hkd">C$347</td></tr>
+            <tr><td>Small kitchen appliances &amp; cookware</td><td>Rice cooker, microwave, kettle, etc.</td><td class="jpy">¥45,000</td><td class="hkd">C$391</td></tr>
+            <tr><td>Kitchen cabinet set</td><td>Countertop + lower cabinets, budget tier, no appliances, needs local installer</td><td class="jpy">¥120,000</td><td class="hkd">C$1,042</td></tr>
+            <tr><td>Curtains &amp; bedding (multiple sets)</td><td></td><td class="jpy">¥30,000</td><td class="hkd">C$261</td></tr>
+            <tr><td>TV &amp; Wi-Fi router</td><td></td><td class="jpy">¥25,000</td><td class="hkd">C$217</td></tr>
+            <tr><td>Washing machine</td><td>Recommend buying used/budget locally — too bulky to ship</td><td class="jpy">¥40,000</td><td class="hkd">C$347</td></tr>
+            <tr><td>China–Hokkaido freight, customs &amp; delivery</td><td>Mostly sea freight to Otaru port — bulky furniture is the biggest cost driver here</td><td class="jpy">¥150,000</td><td class="hkd">C$1,303</td></tr>
+            <tr><td>Miscellaneous items</td><td>Lighting, rugs, bins, slippers, etc.</td><td class="jpy">¥25,000</td><td class="hkd">C$217</td></tr>
+            <tr class="total"><td>Furniture &amp; appliances subtotal</td><td></td><td class="jpy">¥600,000</td><td class="hkd">C$5,210</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap" style="margin-top:14px;">
+        <table>
+          <thead><tr><th>Renovation tier</th><th>Scope</th><th>JPY</th><th>CAD (approx.)</th></tr></thead>
+          <tbody>
+            <tr class="total"><td>Basic renovation (building work + furniture)</td><td>Sound-structure properties — your preferred tier</td><td class="jpy">¥2,730,000</td><td class="hkd">C$23,707</td></tr>
+            <tr><td>Moderate renovation (for reference only)</td><td>Includes electrical/plumbing rewire, kitchen/bath remodel — to be avoided under your selection strategy</td><td class="jpy">¥7,000,000</td><td class="hkd">C$60,788</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="callout" style="margin-top:14px;"><strong>Note:</strong> The return model below uses the "basic renovation" total for "total investment" throughout, consistent with your strategy of selecting properties that don't need major work.</p>
+    </section>
+
+    <section class="block">
+      <h2>3. 180-Day Operating Return Model</h2>
+      <p class="sub">The minpaku annual cap is 180 days. Since you're only considering properties that don't need major work, total investment is now fixed at "closing costs + basic renovation" — the three scenarios vary only in nightly rate and occupancy, the actual remaining uncertainty on the revenue side. Management fee is a flat 30% (including cleaning and OTA management), plus a 3% Airbnb platform fee and annual miscellaneous costs. In each cell, the top line is yen and the line below is the approximate CAD equivalent.</p>
+      <div class="table-wrap">
+        <table class="stmt">
+          <thead>
+            <tr>
+              <th class="item-col">Item</th>
+              <th class="scn-col">Conservative<span class="en">Low case</span></th>
+              <th class="scn-col mid">Moderate<span class="en">Base case</span></th>
+              <th class="scn-col">Optimistic<span class="en">High case</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="assump">
+              <td class="item">Total investment (closing + basic reno, same across all three)</td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥4,230,000</span><span class="amt-h">C$36,733</span></div></td>
+              <td class="amt-cell mid"><div class="amt"><span class="amt-y">¥4,230,000</span><span class="amt-h">C$36,733</span></div></td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥4,230,000</span><span class="amt-h">C$36,733</span></div></td>
+            </tr>
+            <tr class="assump">
+              <td class="item">Nightly rate (whole-house, based on the 4BR comparables you found)</td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥30,500</span><span class="amt-h">C$265</span></div></td>
+              <td class="amt-cell mid"><div class="amt"><span class="amt-y">¥40,700</span><span class="amt-h">C$353</span></div></td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥50,800</span><span class="amt-h">C$441</span></div></td>
+            </tr>
+            <tr class="assump">
+              <td class="item">Occupancy (within 180 days)</td>
+              <td class="amt-cell">50% · 90 nights</td>
+              <td class="amt-cell mid">60% · 108 nights</td>
+              <td class="amt-cell">70% · 126 nights</td>
+            </tr>
+            <tr class="rev">
+              <td class="item">Annual gross rental income</td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥2,745,000</span><span class="amt-h">C$23,838</span></div></td>
+              <td class="amt-cell mid"><div class="amt"><span class="amt-y">¥4,395,600</span><span class="amt-h">C$38,171</span></div></td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥6,400,800</span><span class="amt-h">C$55,585</span></div></td>
+            </tr>
+            <tr>
+              <td class="item">Airbnb platform fee 3%</td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥82,350</span><span class="amt-h">−C$715</span></div></td>
+              <td class="amt-cell mid"><div class="amt neg"><span class="amt-y">−¥131,868</span><span class="amt-h">−C$1,145</span></div></td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥192,024</span><span class="amt-h">−C$1,668</span></div></td>
+            </tr>
+            <tr>
+              <td class="item">Management company fee 30%</td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥823,500</span><span class="amt-h">−C$7,151</span></div></td>
+              <td class="amt-cell mid"><div class="amt neg"><span class="amt-y">−¥1,318,680</span><span class="amt-h">−C$11,451</span></div></td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥1,920,240</span><span class="amt-h">−C$16,675</span></div></td>
+            </tr>
+            <tr>
+              <td class="item">Annual miscellaneous costs</td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥250,000</span><span class="amt-h">−C$2,171</span></div></td>
+              <td class="amt-cell mid"><div class="amt neg"><span class="amt-y">−¥250,000</span><span class="amt-h">−C$2,171</span></div></td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥250,000</span><span class="amt-h">−C$2,171</span></div></td>
+            </tr>
+            <tr class="net">
+              <td class="item">Net annual return</td>
+              <td class="amt-cell"><div class="amt pos"><span class="amt-y">¥1,589,150</span><span class="amt-h">C$13,800</span></div></td>
+              <td class="amt-cell mid"><div class="amt pos"><span class="amt-y">¥2,695,052</span><span class="amt-h">C$23,404</span></div></td>
+              <td class="amt-cell"><div class="amt pos"><span class="amt-y">¥4,038,536</span><span class="amt-h">C$35,071</span></div></td>
+            </tr>
+            <tr class="yieldrow">
+              <td class="item">Return rate (net return ÷ total investment)</td>
+              <td class="amt-cell"><span class="pct">37.6%</span></td>
+              <td class="amt-cell mid"><span class="pct">63.7%</span></td>
+              <td class="amt-cell"><span class="pct">95.5%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>4. Annual Miscellaneous Cost Breakdown (shared across all three scenarios)</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>JPY</th><th>CAD (approx.)</th></tr></thead>
+          <tbody>
+            <tr><td>Utilities &amp; heating (higher usage in Hokkaido winters)</td><td class="jpy">≈ ¥120,000</td><td class="hkd">≈ C$1,042</td></tr>
+            <tr><td>Fire, earthquake &amp; guest-liability insurance</td><td class="jpy">≈ ¥40,000</td><td class="hkd">≈ C$347</td></tr>
+            <tr><td>Fixed asset tax + city planning tax</td><td class="jpy">≈ ¥20,000</td><td class="hkd">≈ C$174</td></tr>
+            <tr><td>Annual tax administrator retainer</td><td class="jpy">≈ ¥50,000</td><td class="hkd">≈ C$434</td></tr>
+            <tr><td>Bedding replacement &amp; consumables reserve</td><td class="jpy">≈ ¥20,000</td><td class="hkd">≈ C$174</td></tr>
+            <tr class="total"><td>Annual miscellaneous cost total</td><td class="jpy">¥250,000</td><td class="hkd">C$2,171</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>5. Key Assumptions to Confirm Before You Commit</h2>
+      <div class="callout">
+        <strong>The ¥2,730,000 basic renovation figure is still an estimate</strong> — Taobao furniture and freight prices vary significantly; get quotes from 2–3 freight forwarders before ordering, especially sea-freight rates for bulky items (sofa, bed frames).<br><br>
+        <strong>Taobao furniture lead time needs to be built into your renovation schedule</strong> — sea freight to Otaru port typically takes 4–8 weeks, plus local delivery and assembly; budget at least a 2-month buffer to avoid delaying your opening.<br><br>
+        <strong>Nightly rate has been raised to ¥30,500–50,800 (C$265–441) based on the 4-bedroom comparables you found</strong> — but the property has no parking and is a 1.3km drive from Otaru Station, a different location draw than the canal-front condo comparables; the listed price doesn't necessarily equal actual booked occupancy — verify against whole-house (not condo) comparables specifically.<br><br>
+        <strong>A 63.7% return (moderate scenario) is unusually high — treat it with caution</strong> — higher-priced properties typically see lower occupancy (fewer travelers can afford C$350+/night); the current 60% occupancy assumption may be too optimistic. Check those comparables' actual review counts and calendar availability, not just the listed price, for a more realistic occupancy estimate.<br><br>
+        <strong>The 30% management fee assumes an all-in rate that includes cleaning</strong> — confirm before signing whether it also covers OTA management, and whether cleaning fees are billed separately to guests.<br><br>
+        <strong>The ¥180,000 fire-equipment estimate assumes a small owner-absent scale</strong> — the actual amount depends on the fire department's on-site assessment; if a higher-tier automatic alarm system is required, the cost will rise accordingly.
+      </div>
+    </section>
+
+  </section>
+
+</main>
+
+<footer>
+  <p>All amounts on this page are estimated from public listing data and market conditions for a property in Ishiyama-chō, Otaru (list price ¥1,100,000, built May 1979, land 102.9㎡, building 107.46㎡, 5LDK). For personal investment planning reference only — not tax or legal advice. Confirm actual applications and costs with your real-estate agent, judicial scrivener, and the Hokkaido minpaku authority. JPY–CAD rate based on the mid-market rate of ¥1 ≈ C$0.008684 as of August 31, 2026.</p>
+</footer>
+
+<script>
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(function(el) {
+      el.classList.toggle('active', el.id === 'page-' + name);
+    });
+    document.querySelectorAll('nav.tabs button').forEach(function(btn) {
+      btn.setAttribute('aria-selected', btn.id === 'tab-' + name ? 'true' : 'false');
+    });
+    try { sessionStorage.setItem('otaru_minpaku_tab', name); } catch (e) {}
+  }
+  (function () {
+    var saved;
+    try { saved = sessionStorage.getItem('otaru_minpaku_tab'); } catch (e) {}
+    if (saved === 'finance') showPage('finance');
+  })();
+</script>

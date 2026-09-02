@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小樽民泊帳 | Otaru Minpaku Ledger</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=Source+Serif+4:wght@400;600&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      color-scheme: light;
+      --paper: #F3ECDD;
+      --surface: #FAF5EA;
+      --surface-2: #EAE0C9;
+      --ink: #2B2318;
+      --text: #453A2A;
+      --muted: #71634E;
+      --accent: #AD7C2C;
+      --accent-ink: #FCF6E9;
+      --accent-2: #5C7A52;
+      --line: #DDD0B0;
+      --shadow: 0 1px 2px rgba(60,48,26,0.05), 0 6px 18px rgba(60,48,26,0.06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      background: var(--paper);
+      color: var(--text);
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      line-height: 1.7;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2 {
+      font-family: 'Noto Serif TC', serif;
+      color: var(--ink);
+      text-wrap: balance;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: clamp(40px, 8vw, 80px) clamp(20px, 4vw, 40px);
+      text-align: center;
+    }
+
+    .logo {
+      margin-bottom: 40px;
+    }
+
+    .logo h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      margin: 0 0 8px 0;
+    }
+
+    .logo p {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin: 0;
+      letter-spacing: 0.05em;
+    }
+
+    .description {
+      margin: 40px 0;
+      font-size: 1.05rem;
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .links {
+      display: flex;
+      gap: 16px;
+      flex-direction: column;
+      margin-top: 50px;
+    }
+
+    @media (min-width: 600px) {
+      .links {
+        flex-direction: row;
+        justify-content: center;
+      }
+    }
+
+    a.button {
+      display: inline-block;
+      padding: 16px 32px;
+      background: var(--accent);
+      color: var(--accent-ink);
+      text-decoration: none;
+      border-radius: 13px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow);
+      border: 2px solid var(--accent);
+    }
+
+    a.button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(60,48,26,0.1), 0 8px 24px rgba(60,48,26,0.12);
+    }
+
+    a.button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+
+    a.button.secondary:hover {
+      background: var(--surface-2);
+    }
+
+    .footer {
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 1px solid var(--line);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h1>小樽民泊帳</h1>
+      <p>Otaru Minpaku Ledger</p>
+    </div>
+
+    <div class="description">
+      <p>A comprehensive planning guide for minpaku (180-day Airbnb-style rental) property investment in Otaru, Hokkaido.</p>
+      <p>Including due diligence checklists, execution roadmap, and detailed financial modeling.</p>
+    </div>
+
+    <div class="links">
+      <a href="zh/" class="button">繁體中文</a>
+      <a href="en/" class="button secondary">English</a>
+    </div>
+
+    <div class="footer">
+      <p>Created for informed investment decisions in Japan's minpaku market.</p>
+    </div>
+  </div>
+</body>
+</html>

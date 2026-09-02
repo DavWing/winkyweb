@@ -1,0 +1,723 @@
+<title>小樽民泊帳</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    color-scheme: light;
+    --paper: #F3ECDD;
+    --surface: #FAF5EA;
+    --surface-2: #EAE0C9;
+    --ink: #2B2318;
+    --text: #453A2A;
+    --muted: #71634E;
+    --accent: #AD7C2C;
+    --accent-ink: #FCF6E9;
+    --accent-2: #5C7A52;
+    --line: #DDD0B0;
+    --bad: #AE3B2C;
+    --shadow: 0 1px 2px rgba(60,48,26,0.05), 0 6px 18px rgba(60,48,26,0.06);
+  }
+  /* Deliberately single-theme: this page commits to a warm washi-paper
+     light look, so it does not follow the viewer's dark-mode preference. */
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--text);
+    font-family: 'Noto Sans TC', 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .display {
+    font-family: 'Noto Serif TC', 'Noto Sans TC', serif;
+    color: var(--ink);
+    text-wrap: balance;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .mono, .num {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  a { color: var(--accent); }
+  ::selection { background: var(--accent); color: var(--accent-ink); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- shell ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    padding: 14px clamp(16px, 4vw, 40px);
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .brand {
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .brand .mark {
+    font-family: 'Noto Serif TC', serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--ink);
+  }
+  .brand .sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  nav.tabs {
+    display: flex; gap: 4px;
+    background: var(--surface-2);
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+  }
+  nav.tabs button {
+    font: inherit;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  nav.tabs button[aria-selected="true"] {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    nav.tabs button { transition: none; }
+  }
+
+  main { max-width: 980px; margin: 0 auto; padding: clamp(24px, 5vw, 56px) clamp(16px, 4vw, 40px) 100px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .hero {
+    display: flex; flex-direction: column; gap: 10px;
+    padding-bottom: 28px; margin-bottom: 32px;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .hero h1 { font-size: clamp(1.6rem, 3.4vw, 2.15rem); margin: 0; }
+  .hero p.lede { color: var(--text); max-width: 62ch; margin: 4px 0 0; font-size: 1rem; }
+
+  .fact-strip {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1px; background: var(--line);
+    border: 1px solid var(--line); border-radius: 13px; overflow: hidden;
+    margin-top: 18px;
+  }
+  .fact-strip div {
+    background: var(--surface); padding: 12px 14px;
+  }
+  .fact-strip .k { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em; }
+  .fact-strip .v { font-family: 'IBM Plex Mono', monospace; font-size: 0.92rem; color: var(--ink); margin-top: 3px; }
+
+  /* ---------- steps page ---------- */
+  .phase { margin-bottom: 40px; }
+  .phase-head {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .phase-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem; font-weight: 600;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 3px 10px;
+    flex-shrink: 0;
+  }
+  .phase-head h2 { font-size: 1.2rem; margin: 0; }
+  .phase-head .phase-en { font-size: 0.78rem; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+
+  ol.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  ol.steps li {
+    display: grid; grid-template-columns: 34px 1fr; gap: 14px;
+    padding: 13px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  ol.steps li + li { border-top: none; }
+  ol.steps li:first-child { border-radius: 13px 13px 0 0; }
+  ol.steps li:last-child { border-radius: 0 0 13px 13px; }
+  ol.steps li:only-child { border-radius: 13px; }
+  .step-i {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding-top: 1px;
+  }
+  .step-body strong { color: var(--ink); font-weight: 700; }
+  .step-body .note {
+    display: block; margin-top: 4px;
+    font-size: 0.86rem; color: var(--muted);
+  }
+  .tag {
+    display: inline-block; font-size: 0.68rem; font-family: 'IBM Plex Mono', monospace;
+    padding: 1px 7px; border-radius: 5px; margin-left: 8px;
+    background: color-mix(in srgb, var(--bad) 16%, transparent);
+    color: var(--bad); font-weight: 600; letter-spacing: 0.02em;
+    vertical-align: 1px;
+  }
+  .tag.req {
+    background: color-mix(in srgb, var(--accent-2) 20%, transparent);
+    color: var(--accent-2);
+  }
+
+  /* ---------- due-diligence checklist (before-purchase page) ---------- */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-top: 16px; padding: 12px 14px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 13px;
+    font-size: 0.82rem; color: var(--muted);
+  }
+  .legend b { color: var(--ink); }
+  .imp {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; font-weight: 700;
+    padding: 2px 9px; border-radius: 6px; letter-spacing: 0.02em; white-space: nowrap;
+  }
+  .imp-high { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
+  .imp-mid  { background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--accent); }
+  .imp-low  { background: color-mix(in srgb, var(--muted) 16%, transparent); color: var(--muted); }
+
+  ul.chk { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  ul.chk li {
+    display: grid; grid-template-columns: 30px 1fr; gap: 14px;
+    padding: 14px; background: var(--surface); border: 1px solid var(--line);
+  }
+  ul.chk li + li { border-top: none; }
+  ul.chk li:first-child { border-radius: 13px 13px 0 0; }
+  ul.chk li:last-child { border-radius: 0 0 13px 13px; }
+  ul.chk li:only-child { border-radius: 13px; }
+  .chk-i { font-family: 'IBM Plex Mono', monospace; color: var(--muted); font-size: 0.8rem; padding-top: 2px; }
+  .chk-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-bottom: 5px; }
+  .chk-top strong { color: var(--ink); font-weight: 700; font-size: 0.96rem; }
+  .chk-why { font-size: 0.86rem; color: var(--text); }
+  .chk-why b { color: var(--ink); }
+  .chk-general { font-size: 0.86rem; color: var(--muted); margin-top: 3px; display: block; }
+
+  /* ---------- finance page ---------- */
+  .stat-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px; margin-bottom: 36px;
+  }
+  .stat {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 18px 16px;
+  }
+  .stat .k { font-size: 0.76rem; color: var(--muted); }
+  .stat .v { font-family: 'IBM Plex Mono', monospace; font-size: 1.5rem; color: var(--ink); font-weight: 600; margin-top: 6px; }
+  .stat .v2 { font-family: 'IBM Plex Mono', monospace; font-size: 0.92rem; color: var(--accent); margin-top: 2px; }
+
+  section.block { margin-bottom: 44px; }
+  section.block > h2 { font-size: 1.15rem; margin: 0 0 4px; }
+  section.block > .sub { color: var(--muted); font-size: 0.88rem; margin: 0 0 18px; max-width: 68ch; }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 13px; }
+  table { width: 100%; border-collapse: collapse; min-width: 560px; background: var(--surface); }
+  th, td { padding: 11px 14px; text-align: left; font-size: 0.9rem; border-bottom: 1px solid var(--line); }
+  thead th {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; letter-spacing: 0.05em;
+    color: var(--muted); text-transform: uppercase; background: var(--surface-2);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.jpy, td.hkd { font-family: 'IBM Plex Mono', monospace; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.hkd { color: var(--muted); font-size: 0.84rem; }
+  tr.total td { font-weight: 700; color: var(--ink); border-top: 2px solid var(--line); }
+  tr.total td.jpy, tr.total td.hkd { font-weight: 700; }
+
+  /* ---------- statement table (180-day scenario comparison) ---------- */
+  table.stmt { min-width: 680px; }
+  table.stmt th, table.stmt td { border-bottom: 1px solid var(--line); }
+  table.stmt thead th { text-transform: none; font-size: 0.8rem; }
+  table.stmt thead th.item-col { text-align: left; }
+  table.stmt thead th.scn-col { text-align: right; color: var(--ink); font-weight: 700; }
+  table.stmt thead th.scn-col .en { display: block; font-weight: 400; color: var(--muted); font-size: 0.68rem; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+  table.stmt thead th.scn-col.mid { background: color-mix(in srgb, var(--accent) 10%, var(--surface-2)); }
+  table.stmt td.item { color: var(--text); white-space: nowrap; }
+  table.stmt td.amt-cell { text-align: right; }
+  table.stmt td.amt-cell.mid { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  table.stmt tr.assump td.item { color: var(--muted); font-size: 0.84rem; }
+  table.stmt tr.assump td.amt-cell { font-size: 0.84rem; color: var(--muted); }
+  table.stmt tr.rev td { border-top: 2px solid var(--line); padding-top: 13px; }
+  table.stmt tr.net td { border-top: 3px double var(--ink); padding-top: 14px; }
+  table.stmt tr.net td.item { font-weight: 700; color: var(--ink); }
+  table.stmt tr.yieldrow td { border-bottom: none; padding-top: 4px; }
+  table.stmt tr.yieldrow td.item { font-size: 0.82rem; color: var(--muted); }
+  .amt { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+  .amt-y { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .amt-h { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.78rem; }
+  .amt.neg .amt-y, .amt.neg .amt-h { color: var(--bad); }
+  .amt.pos .amt-y { color: var(--accent-2); font-size: 1.05rem; font-weight: 700; }
+  .amt.pos .amt-h { color: var(--accent-2); opacity: 0.75; }
+  .pct { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 700; color: var(--ink); font-size: 1rem; }
+
+  .callout {
+    background: var(--surface-2); border-left: 3px solid var(--accent);
+    border-radius: 0 13px 13px 0; padding: 14px 16px; font-size: 0.86rem; color: var(--text);
+  }
+  .callout strong { color: var(--ink); }
+
+  footer {
+    max-width: 980px; margin: 0 auto; padding: 30px clamp(16px, 4vw, 40px) 60px;
+    color: var(--muted); font-size: 0.78rem; border-top: 1px solid var(--line);
+  }
+  footer p { max-width: 74ch; }
+</style>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="mark">小樽民泊帳</span>
+    <span class="sub">石山町・住宅宿泊事業計劃</span>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="頁面">
+    <button role="tab" aria-selected="true" aria-controls="page-before" id="tab-before" onclick="showPage('before')">購買前・選屋</button>
+    <button role="tab" aria-selected="false" aria-controls="page-during" id="tab-during" onclick="showPage('during')">過戶登記及營運</button>
+    <button role="tab" aria-selected="false" aria-controls="page-finance" id="tab-finance" onclick="showPage('finance')">財務試算</button>
+  </nav>
+</div>
+
+<main>
+
+  <!-- ============ BEFORE-PURCHASE PAGE ============ -->
+  <section class="page active" id="page-before" role="tabpanel" aria-labelledby="tab-before">
+    <div class="hero">
+      <span class="eyebrow">House-Selection Due Diligence</span>
+      <h1>揀屋須知：30項查證要點</h1>
+      <p class="lede">簽約前應逐項核實的事項，按屋況、土地、寒帶特性、民泊適合性四大範疇分類。每項附「180日民泊重要度」——即該項目一旦有問題，對能否/能否高質量地做滿180日Airbnb的影響有多大，並非泛指一般買樓風險。</p>
+      <div class="fact-strip">
+        <div><div class="k">物件</div><div class="v">石山町中古一戸建</div></div>
+        <div><div class="k">購入価格</div><div class="v">¥1,100,000</div></div>
+        <div><div class="k">土地 / 建物</div><div class="v">102.9㎡ / 107.46㎡</div></div>
+        <div><div class="k">間取</div><div class="v">5LDK・木造2階建</div></div>
+        <div><div class="k">築年</div><div class="v">1979年5月（旧耐震）</div></div>
+      </div>
+      <div class="legend">
+        <span><span class="imp imp-high">高</span> = <b>直接影響</b>能否申報／通過消防検査，或造成無人管理下的重大安全或財務風險</span>
+        <span><span class="imp imp-mid">中</span> = <b>影響裝修預算或營運成本</b>，非法規硬性關卡</span>
+        <span><span class="imp imp-low">低</span> = 一般買樓應留意，惟對180日民泊<b>影響輕微</b>或本物件已知合規</span>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">01 — 03</span>
+        <h2>A. 建築年份與耐震</h2>
+        <span class="phase-en">Age &amp; seismic</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">01</span><div><div class="chk-top"><strong>1981年6月（昭和56年6月）新耐震基準分界</strong><span class="imp imp-high">高</span></div><div class="chk-why">確認「建築確認申請」日期是否在此之前。本物件1979年建成，屬「旧耐震」。</div><span class="chk-general">直接影響火險／地震保険投保條件及保費，亦是判斷是否需要另做耐震診断的第一步。</span></div></li>
+        <li><span class="chk-i">02</span><div><div class="chk-top"><strong>耐震診断報告</strong><span class="imp imp-mid">中</span></div><div class="chk-why">查問賣方有否做過，有的話直接索取；沒有應預留診断費用（約¥150,000–300,000）。</div><span class="chk-general">不影響180日申報本身，但影響保險條款及日後轉售時買家信心。</span></div></li>
+        <li><span class="chk-i">03</span><div><div class="chk-top"><strong>増改築記録核對</strong><span class="imp imp-high">高</span></div><div class="chk-why">屋齡40年以上常有未經批准的增建（加建浴室、封露台等），須核對登記面積與現況面積是否一致。</div><span class="chk-general">面積不符會令消防検査及届出時的樓面面積申報出現矛盾，可能要求先行合法化才能通過届出。</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">04 — 07</span>
+        <h2>B. 建築合法性文件</h2>
+        <span class="phase-en">Legal documents</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">04</span><div><div class="chk-top"><strong>建築確認済証</strong><span class="imp imp-high">高</span></div><div class="chk-why">確認原建築有否經過建築確認審批——判斷該屋是否「合法建築物」的第一份文件。</div><span class="chk-general">沒有此證的房屋，日後任何改建、加建都會遇到困難，亦令消防検査申請複雜化。</span></div></li>
+        <li><span class="chk-i">05</span><div><div class="chk-top"><strong>検査済証（完了検査）</strong><span class="imp imp-high">高</span></div><div class="chk-why">完工後有否經政府覆檢發出的完工證明。日本舊屋（尤其鄉郊、執法寬鬆年代）普遍缺乏此證，沒有不代表違法，但會令審批需時更長。</div><span class="chk-general">是「消防法令適合通知書」審批流程中最常見的延誤原因之一——該通知書是住宅宿泊事業届出的必要文件。</span></div></li>
+        <li><span class="chk-i">06</span><div><div class="chk-top"><strong>既存不適格建築物</strong><span class="imp imp-mid">中</span></div><div class="chk-why">建於現行建築基準法生效前，依法可繼續使用，惟若做「大規模の修繕・模様替え」（大型翻新）可能被要求整棟升級至現行標準。</div><span class="chk-general">主要推高裝修預算，非直接阻礙民泊申請本身。</span></div></li>
+        <li><span class="chk-i">07</span><div><div class="chk-top"><strong>違法建築物（未登記增建）</strong><span class="imp imp-high">高</span></div><div class="chk-why">若發現有未登記的違法增建部分，須先補辦手續或拆除才能進行後續申請。</div><span class="chk-general">若涉及消防検査範圍內的房間，未合法化前無法通過消防法令適合通知書審批。</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">08 — 11</span>
+        <h2>C. 土地及境界</h2>
+        <span class="phase-en">Land &amp; boundaries</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">08</span><div><div class="chk-top"><strong>境界明示（確定測量図）</strong><span class="imp imp-mid">中</span></div><div class="chk-why">賣方應提供與鄰地地主已簽署確認的「確定測量図」，而非僅推算的「現況測量図」。</div><span class="chk-general">不直接影響180日申報，但邊界不清會令落雪、排水糾紛更難處理，亦影響日後加建。</span></div></li>
+        <li><span class="chk-i">09</span><div><div class="chk-top"><strong>越境（屋簷、圍牆跨界）</strong><span class="imp imp-mid">中</span></div><div class="chk-why">檢查屋簷、水管、圍牆有否跨越鄰地地界，或鄰居物件跨越己方地界。舊式密集住宅區常見。</div><span class="chk-general">日後翻新外牆或加建露台時可能引發糾紛，惟非民泊申請本身的障礙。</span></div></li>
+        <li><span class="chk-i">10</span><div><div class="chk-top"><strong>接道義務・再建築不可</strong><span class="imp imp-high">高</span></div><div class="chk-why">確認土地是否臨接寬4米以上道路，並最少有2米臨路（建築基準法42・43条）。不合資格即屬「再建築不可」——全國空屋中，此比例（41.6%）明顯高於一般住宅（33.6%）。</div><span class="chk-general">雖不影響現有建築物申報，惟（a）嚴重影響日後轉售/退場價值，（b）臨路過窄可能影響消防車輛能否駛近，是消防検査的實際考慮因素之一。</span></div></li>
+        <li><span class="chk-i">11</span><div><div class="chk-top"><strong>私道負擔</strong><span class="imp imp-low">低</span></div><div class="chk-why">本物件已標示「私道負擔：無」，惟仍應核實出入道路的擁有權及維護責任誰屬。</div><span class="chk-general">已知本物件為公有道路，屬有利因素；郊區屋常見私道共有問題，購買其他物件時應留意。</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">12 — 17</span>
+        <h2>D. 積雪寒冷地特有</h2>
+        <span class="phase-en">Snow &amp; cold-climate</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">12</span><div><div class="chk-top"><strong>屋頂設計：落雪屋根 vs 無落雪屋根</strong><span class="imp imp-high">高</span></div><div class="chk-why">傾斜屋頂會將積雪滑落至地面甚至鄰地。日本法院曾裁定業主須為落雪造成的鄰損負賠償責任，尤其疏於裝設雪止め或定期除雪時。</div><span class="chk-general">對無人駐守、住客自助入住的Airbnb而言，落雪傷及訪客或鄰居的法律及保險風險極高，應優先考慮已改建為無落雪屋根或已裝雪止め的物件。</span></div></li>
+        <li><span class="chk-i">13</span><div><div class="chk-top"><strong>除雪責任及冬季動線</strong><span class="imp imp-high">高</span></div><div class="chk-why">確認積雪期間，物業前道路由市府剷雪還是私人負責；物件位於石山町山坡，須評估暴雪後管理公司／清潔人員能否準時到達。</div><span class="chk-general">直接影響入住率及緊急應變能力——若冬季實際難以到達，180日中的冬季檔期可能名存實亡。</span></div></li>
+        <li><span class="chk-i">14</span><div><div class="chk-top"><strong>保温・二重窓（雙層玻璃）</strong><span class="imp imp-high">高</span></div><div class="chk-why">確認舊屋是否已做保温改造，窗戶是否雙層玻璃。缺乏保温會令暖氣費暴增，亦直接影響住客體驗。</div><span class="chk-general">是冬季北海道民泊最常見的差評來源之一，同時直接影響營運成本。</span></div></li>
+        <li><span class="chk-i">15</span><div><div class="chk-top"><strong>水抜き（防凍水閥）及水管防凍深度</strong><span class="imp imp-high">高</span></div><div class="chk-why">確認自來水及熱水管道的防凍深度是否足夠，離開期間有否「水抜き」裝置防止爆管。</div><span class="chk-general">無人看管期間爆管是最常見及最昂貴的意外之一，對遙距管理的海外業主風險尤高。</span></div></li>
+        <li><span class="chk-i">16</span><div><div class="chk-top"><strong>灯油タンク（暖氣油缸）狀況</strong><span class="imp imp-mid">中</span></div><div class="chk-why">北海道住宅普遍以火水／石油作暖氣燃料，須檢查油缸及管道有否老化、滲漏。</div><span class="chk-general">影響裝修預算及暖氣系統是否需要更換，非法規障礙。</span></div></li>
+        <li><span class="chk-i">17</span><div><div class="chk-top"><strong>融雪設備／人行動線剷雪</strong><span class="imp imp-mid">中</span></div><div class="chk-why">車道、行人通道有否融雪管線或需人手剷雪。</div><span class="chk-general">本物件已知無停車位，此項相對次要，惟仍影響訪客能否安全步行到達正門。</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">18 — 20</span>
+        <h2>E. 設備及基礎建設</h2>
+        <span class="phase-en">Utilities</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">18</span><div><div class="chk-top"><strong>電気容量（安培数）</strong><span class="imp imp-mid">中</span></div><div class="chk-why">舊屋電力容量普遍偏低（如20–30A），多部暖氣、電磁爐、洗衣乾衣機同時使用可能需升級至40–60A。</div><span class="chk-general">影響裝修預算，非法規強制要求。</span></div></li>
+        <li><span class="chk-i">19</span><div><div class="chk-top"><strong>上下水道 vs 浄化槽</strong><span class="imp imp-low">低</span></div><div class="chk-why">本物件已知為公營水道及本下水（公共污水渠），毋須擔心私人化糞池保養問題。</div><span class="chk-general">已核實為公共設施，屬有利因素。</span></div></li>
+        <li><span class="chk-i">20</span><div><div class="chk-top"><strong>網絡覆蓋（光纖／流動網絡）</strong><span class="imp imp-high">高</span></div><div class="chk-why">智能門鎖及無人自助入住高度依賴穩定Wi-Fi及流動網絡訊號，山坡地區收訊可能較弱，購買前應實地測試。</div><span class="chk-general">若網絡不穩定，智能門鎖及Airbnb即時通訊將直接失效，是無人管理營運模式的命脈。</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">21 — 24</span>
+        <h2>F. 民泊營運適合性</h2>
+        <span class="phase-en">Minpaku fit</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">21</span><div><div class="chk-top"><strong>學校100米條例覆核</strong><span class="imp imp-high">高</span></div><div class="chk-why">北海道条例規定小中學正門100米內平日（授業日）禁止營運民泊；應向北海道民泊portal或小樽市城市規劃部門索取書面確認，不應只憑步行時間估算。</div><span class="chk-general">直接決定可營運日數，是180日模式能否成立的前提。</span></div></li>
+        <li><span class="chk-i">22</span><div><div class="chk-top"><strong>用途地域及建ぺい率・容積率</strong><span class="imp imp-mid">中</span></div><div class="chk-why">已知為第一種住居地域，60%・200%，一般容許民泊用途，惟應向小樽市都市計画課書面確認個別地塊有否額外規劃限制。</div><span class="chk-general">已知合規機會高，惟書面確認可避免日後爭議。</span></div></li>
+        <li><span class="chk-i">23</span><div><div class="chk-top"><strong>鄰居關係及町內會</strong><span class="imp imp-high">高</span></div><div class="chk-why">民泊最常見的營運風險是鄰居投訴（噪音、垃圾、訪客車輛），購買前應了解該區居民結構（是否以長居家庭為主）及町內會有否就民泊表達過意見。</div><span class="chk-general">鄰居投訴是民泊届出後最常見的行政指導甚至停業原因之一。</span></div></li>
+        <li><span class="chk-i">24</span><div><div class="chk-top"><strong>消防検査可行性初步評估</strong><span class="imp imp-high">高</span></div><div class="chk-why">委託消防設備公司做初步評估，確認現有間隔、樓梯、窗戶能否符合民泊消防標準，抑或需大規模改動（如加建第二避難通道）。</div><span class="chk-general">若需加建避難通道，會大幅推高裝修預算並延長開業時間。</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">25 — 28</span>
+        <h2>G. 物理狀態檢查</h2>
+        <span class="phase-en">Physical condition</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">25</span><div><div class="chk-top"><strong>雨漏り（漏水）</strong><span class="imp imp-high">高</span></div><div class="chk-why">天花、閣樓有否滲水痕跡，尤其融雪期間屋簷排水系統負荷最大。</div><span class="chk-general">若未及早發現，會導致結構及霉菌問題，並直接影響裝修預算。</span></div></li>
+        <li><span class="chk-i">26</span><div><div class="chk-top"><strong>基礎裂縫及傾斜</strong><span class="imp imp-high">高</span></div><div class="chk-why">44年木造屋常見地基不均勻沉降，應委託驗屋師檢查主要牆身及地基。</div><span class="chk-general">結構問題屬裝修預算中最大單一變數，亦直接關乎住客安全。</span></div></li>
+        <li><span class="chk-i">27</span><div><div class="chk-top"><strong>シロアリ（白蟻）及木材腐朽</strong><span class="imp imp-mid">中</span></div><div class="chk-why">北海道氣候寒冷，白蟻風險相對本州較低，惟仍應檢查地台及木結構有否因漏水或通風不良而腐朽。</div><span class="chk-general">北海道發生率較低，惟仍建議驗屋師一併檢查。</span></div></li>
+        <li><span class="chk-i">28</span><div><div class="chk-top"><strong>アスベスト（石棉）建材</strong><span class="imp imp-mid">中</span></div><div class="chk-why">1980年代前建築普遍使用含石棉物料（天花板、外牆），翻新拆除時須按法例處理。</div><span class="chk-general">不影響現狀居住安全，但動工翻新時的合規處理成本應預先計入預算。</span></div></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">29 — 30</span>
+        <h2>H. 財務及補助機會</h2>
+        <span class="phase-en">Subsidies</span>
+      </div>
+      <ul class="chk">
+        <li><span class="chk-i">29</span><div><div class="chk-top"><strong>空き家バンク登錄</strong><span class="imp imp-mid">中</span></div><div class="chk-why">確認該物件有否登錄於小樽市或北海道的「空き家バンク」，部分自治體對經此成交的物件提供裝修補助金。</div><span class="chk-general">屬潛在裝修成本回贈機會，購買前應向小樽市查詢。</span></div></li>
+        <li><span class="chk-i">30</span><div><div class="chk-top"><strong>自治體空屋改修補助金</strong><span class="imp imp-mid">中</span></div><div class="chk-why">個別查詢小樽市及北海道現行的老屋節能／耐震改修補助計劃，部分保温工程、耐震補強可獲資助。</div><span class="chk-general">可直接減低裝修預算中最大的不確定項目。</span></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ DURING-PURCHASE, RENOVATION & OPERATIONS PAGE ============ -->
+  <section class="page" id="page-during" role="tabpanel" aria-labelledby="tab-during">
+    <div class="hero">
+      <span class="eyebrow">Purchase, Renovation &amp; Operations</span>
+      <h1>簽約到營運上線：15個步驟</h1>
+      <p class="lede">揀好物件、完成上一頁的查證後，由簽約過戶，到裝修合規、申報開業，直至每年持續營運要求，全部收錄在這一頁。橙框標籤代表因業主為海外非居民而額外產生的手續。</p>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">01 — 05</span>
+        <h2>購買及過戶</h2>
+        <span class="phase-en">Purchase &amp; registration</span>
+      </div>
+      <ol class="steps">
+        <li><span class="step-i">01</span><div class="step-body"><strong>簽署買賣合約</strong> — 支付訂金，確定交收日期。</div></li>
+        <li><span class="step-i">02</span><div class="step-body"><strong>申請署名証明書</strong><span class="tag">海外買家</span><span class="note">前往駐香港日本國總領事館，以署名証明書取代日本實印的印鑑証明書；同時準備住所証明代替文件。</span></div></li>
+        <li><span class="step-i">03</span><div class="step-body"><strong>登記國內連絡先</strong><span class="tag">海外買家</span><span class="note">2024年4月起，非居民外國買家於登記時必須申報一個日本國內連絡地址，一般由司法書士事務所代辦。</span></div></li>
+        <li><span class="step-i">04</span><div class="step-body"><strong>經司法書士辦理過戶登記</strong> — 交收後20日內須經日本銀行提交外為法（FEFTA）取得報告書。</div></li>
+        <li><span class="step-i">05</span><div class="step-body"><strong>繳交登錄免許税、不動産取得税及印紙税</strong></div></li>
+      </ol>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">06 — 09</span>
+        <h2>裝修及消防合規</h2>
+        <span class="phase-en">Renovation &amp; fire compliance</span>
+      </div>
+      <ol class="steps">
+        <li><span class="step-i">06</span><div class="step-body"><strong>索取3間或以上裝修公司報價</strong> — 範圍包括保温改造（北海道嚴冬必須）、水電重拉、廚房浴室翻新。</div></li>
+        <li><span class="step-i">07</span><div class="step-body"><strong>按民泊消防標準加建設備</strong> — 煙霧警報器、滅火器、緊急照明、避難指示。</div></li>
+        <li><span class="step-i">08</span><div class="step-body"><strong>向小樽市消防署申請消防検査</strong><span class="note">須取得消防用設備等設置届出済証，此為住宅宿泊事業届出的必要文件。</span></div></li>
+        <li><span class="step-i">09</span><div class="step-body"><strong>完成裝修並置業配套</strong> — 家具家電、智能門鎖（無人自助登記入住必需）、Wi-Fi。</div></li>
+      </ol>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">10 — 12</span>
+        <h2>登記及開業</h2>
+        <span class="phase-en">Notification &amp; launch</span>
+      </div>
+      <ol class="steps">
+        <li><span class="step-i">10</span><div class="step-body"><strong>向北海道政府提出「住宅宿泊事業届出」</strong> — 取得届出番號，此號碼須顯示於所有Airbnb / Booking.com listing。</div></li>
+        <li><span class="step-i">11</span><div class="step-body"><strong>委任持牌「住宅宿泊管理業者」</strong><span class="tag req">法定必須</span><span class="note">業主不居於物件附近，法例強制要求委任持牌管理業者，通常可與清潔／營運管理公司為同一間。</span></div></li>
+        <li><span class="step-i">12</span><div class="step-body"><strong>委任納税管理人</strong><span class="tag">海外買家</span><span class="note">非居民須委任日本境內納税管理人，代為每年申報日本所得税。</span></div></li>
+      </ol>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">
+        <span class="phase-num">13 — 15</span>
+        <h2>持續營運</h2>
+        <span class="phase-en">Ongoing operations</span>
+      </div>
+      <ol class="steps">
+        <li><span class="step-i">13</span><div class="step-body"><strong>每兩個月提交住宿者名簿報告</strong> — 呈交北海道政府，記錄住客人數及國籍。</div></li>
+        <li><span class="step-i">14</span><div class="step-body"><strong>每年經納税管理人申報日本非居民所得税</strong></div></li>
+        <li><span class="step-i">15</span><div class="step-body"><strong>每年檢視管理費結算及180日營運上限</strong><span class="note">留意實際已用營運日數，避免超出住宅宿泊事業180日／年的法定上限。</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ FINANCE PAGE ============ -->
+  <section class="page" id="page-finance" role="tabpanel" aria-labelledby="tab-finance">
+    <div class="hero">
+      <span class="eyebrow">Financial Model</span>
+      <h1>預算、成本與180日回報試算</h1>
+      <p class="lede">所有金額以日圓（¥）為準，港幣（HK$）為輔助換算，按 2026年8月28日中間價 <span class="mono">¥1 ≈ HK$0.0492</span>（HK$1 ≈ ¥20.3）計算，僅供參考，實際匯率請於交易時以銀行報價為準。</p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat">
+        <div class="k">購入価格</div>
+        <div class="v">¥1,100,000</div>
+        <div class="v2">≈ HK$54,120</div>
+      </div>
+      <div class="stat">
+        <div class="k">預計總投資（過戶＋基本翻新）</div>
+        <div class="v">¥4,230,000</div>
+        <div class="v2">≈ HK$208,116</div>
+      </div>
+      <div class="stat">
+        <div class="k">180日情境・中等年淨回報</div>
+        <div class="v">¥2,695,052</div>
+        <div class="v2">≈ HK$132,597／年</div>
+      </div>
+      <div class="stat">
+        <div class="k">中等情境回報率</div>
+        <div class="v">63.7%</div>
+        <div class="v2">淨回報 ÷ 總投資</div>
+      </div>
+    </div>
+
+    <section class="block">
+      <h2>一、購買過戶成本</h2>
+      <p class="sub">物件價格雖僅¥1,100,000，惟司法書士及仲介等費用不隨價格等比縮減，實際佔比遠高於一般物業交易。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>項目</th><th>備註</th><th>日圓</th><th>港幣（約）</th></tr></thead>
+          <tbody>
+            <tr><td>購入価格</td><td>石山町 5LDK 舊屋</td><td class="jpy">¥1,100,000</td><td class="hkd">HK$54,120</td></tr>
+            <tr><td>仲介手数料</td><td>低廉空家特例，上限¥330,000（連稅）</td><td class="jpy">¥0–330,000</td><td class="hkd">HK$0–16,236</td></tr>
+            <tr><td>登錄免許税＋不動産取得税</td><td>按評価証明書實際金額而定</td><td class="jpy">¥20,000–100,000</td><td class="hkd">HK$984–4,920</td></tr>
+            <tr><td>司法書士報酬</td><td>與物件價格無關，屬固定收費</td><td class="jpy">¥70,000–100,000</td><td class="hkd">HK$3,444–4,920</td></tr>
+            <tr><td>印紙税</td><td>減稅措施期內</td><td class="jpy">¥1,000</td><td class="hkd">HK$49</td></tr>
+            <tr><td>署名証明書（駐港領事館）</td><td>取代印鑑証明，連文件公証</td><td class="jpy">¥5,000–20,000</td><td class="hkd">HK$246–984</td></tr>
+            <tr><td>國內連絡先登記</td><td>2024年4月起強制要求</td><td class="jpy">¥10,000–30,000</td><td class="hkd">HK$492–1,476</td></tr>
+            <tr class="total"><td>過戶完成總額</td><td>購入価格 + 上述手續費</td><td class="jpy">¥1,300,000–1,700,000</td><td class="hkd">HK$63,960–83,640</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>二、裝修及合規成本</h2>
+      <p class="sub">已按你的選屋策略調整：只考慮驗屋後毋須大修的物件，故不再計算「全面翻新」情境。以下為「基本翻新」的完整明細，家具家電部分假設主要經淘寶採購並集運到北海道。</p>
+
+      <div class="callout" style="margin-bottom:18px;">
+        <strong>消防設備不能省略——但規模遠比想像中小。</strong> 住宅宿泊事業届出必須附上「消防法令適合通知書」，這是法例要求，<b>與180日／年上限無關</b>（180日只限制營業日數，不影響是否需要消防合規）。不過對於小型「家主不在型」單棟住宅（即業主不常駐），實際要求通常只是住宅用火災警報器、滅火器及基本誘導灯，遠非旅館業簡易宿所級數的自動報警／灑水系統，成本已計入下方「基本建築工程」，金額不大。
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>基本建築工程</th><th>備註</th><th>日圓</th><th>港幣（約）</th></tr></thead>
+          <tbody>
+            <tr><td>保温改造</td><td>外牆／閣樓簡易保温</td><td class="jpy">¥800,000</td><td class="hkd">HK$39,360</td></tr>
+            <tr><td>雙層玻璃（二重窓）</td><td>主要房間及客廳約8–10扇窗加裝内窓，較整窗更換便宜</td><td class="jpy">¥400,000</td><td class="hkd">HK$19,680</td></tr>
+            <tr><td>水電基本檢查及局部小修</td><td>非全屋重拉，僅老化部分</td><td class="jpy">¥400,000</td><td class="hkd">HK$19,680</td></tr>
+            <tr><td>消防用設備</td><td>住宅用火災警報器＋滅火器＋基本誘導灯（家主不在型小型規模）</td><td class="jpy">¥180,000</td><td class="hkd">HK$8,856</td></tr>
+            <tr><td>智能門鎖及基本保安</td><td>無人自助入住必需</td><td class="jpy">¥50,000</td><td class="hkd">HK$2,460</td></tr>
+            <tr><td>暖氣系統檢查及基本維修</td><td>灯油タンク及管道</td><td class="jpy">¥150,000</td><td class="hkd">HK$7,380</td></tr>
+            <tr><td>一般油漆及小型修補</td><td></td><td class="jpy">¥150,000</td><td class="hkd">HK$7,380</td></tr>
+            <tr class="total"><td>建築工程小計</td><td></td><td class="jpy">¥2,130,000</td><td class="hkd">HK$104,796</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap" style="margin-top:14px;">
+        <table>
+          <thead><tr><th>家具家電（淘寶採購）</th><th>備註</th><th>日圓</th><th>港幣（約）</th></tr></thead>
+          <tbody>
+            <tr><td>床架及床褥（3套）</td><td>私人房間用</td><td class="jpy">¥90,000</td><td class="hkd">HK$4,428</td></tr>
+            <tr><td>布藝梳化</td><td>客廳</td><td class="jpy">¥35,000</td><td class="hkd">HK$1,722</td></tr>
+            <tr><td>餐桌連餐椅（6張）</td><td></td><td class="jpy">¥40,000</td><td class="hkd">HK$1,968</td></tr>
+            <tr><td>廚房小家電及鍋具餐具</td><td>電飯煲、微波爐、熱水壺等</td><td class="jpy">¥45,000</td><td class="hkd">HK$2,214</td></tr>
+            <tr><td>廚房組合櫃（工作台連下櫃）</td><td>平價款式，不含電器，需本地師傅裝嵌</td><td class="jpy">¥120,000</td><td class="hkd">HK$5,904</td></tr>
+            <tr><td>窗簾及寢具（多套替換）</td><td></td><td class="jpy">¥30,000</td><td class="hkd">HK$1,476</td></tr>
+            <tr><td>電視及Wi-Fi路由器</td><td></td><td class="jpy">¥25,000</td><td class="hkd">HK$1,230</td></tr>
+            <tr><td>洗衣機</td><td>建議本地購買二手／平價新機，體積大不宜海運</td><td class="jpy">¥40,000</td><td class="hkd">HK$1,968</td></tr>
+            <tr><td>中国—北海道 集運、清關及送貨上門</td><td>海運到小樽港為主，家具體積大佔成本一大部分</td><td class="jpy">¥150,000</td><td class="hkd">HK$7,380</td></tr>
+            <tr><td>雜項家品</td><td>燈飾、地毯、垃圾桶、拖鞋等</td><td class="jpy">¥25,000</td><td class="hkd">HK$1,230</td></tr>
+            <tr class="total"><td>家具家電小計</td><td></td><td class="jpy">¥600,000</td><td class="hkd">HK$29,520</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-wrap" style="margin-top:14px;">
+        <table>
+          <thead><tr><th>裝修水平</th><th>範圍</th><th>日圓</th><th>港幣（約）</th></tr></thead>
+          <tbody>
+            <tr class="total"><td>基本翻新（建築工程＋家具家電）</td><td>結構良好物件，你的選屋首選</td><td class="jpy">¥2,730,000</td><td class="hkd">HK$134,316</td></tr>
+            <tr><td>中度翻新（僅供參考）</td><td>連水電重拉、廚浴翻新——按你的選屋策略應盡量避免</td><td class="jpy">¥7,000,000</td><td class="hkd">HK$344,400</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="callout" style="margin-top:14px;"><strong>提示：</strong>下方回報試算表已統一採用「基本翻新」總額計算「總投資」，與你揀選毋須大修物件的策略一致。</p>
+    </section>
+
+    <section class="block">
+      <h2>三、180日營運回報試算表</h2>
+      <p class="sub">住宅宿泊事業年上限為180日。因應你只選毋須大修的物件，總投資已固定為「過戶成本＋基本翻新」，三個情境只變動每晚房價及入住率（收入端的不確定性）。管理公司抽成統一按30%（連清潔及OTA代管），另計Airbnb平台費3%及年度雜項開支。每格上行為日圓、下行為約值港幣。</p>
+      <div class="table-wrap">
+        <table class="stmt">
+          <thead>
+            <tr>
+              <th class="item-col">項目</th>
+              <th class="scn-col">保守<span class="en">Conservative</span></th>
+              <th class="scn-col mid">中等<span class="en">Moderate</span></th>
+              <th class="scn-col">樂觀<span class="en">Optimistic</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="assump">
+              <td class="item">總投資（過戶＋基本翻新，三情境共同）</td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥4,230,000</span><span class="amt-h">HK$208,116</span></div></td>
+              <td class="amt-cell mid"><div class="amt"><span class="amt-y">¥4,230,000</span><span class="amt-h">HK$208,116</span></div></td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥4,230,000</span><span class="amt-h">HK$208,116</span></div></td>
+            </tr>
+            <tr class="assump">
+              <td class="item">每晚房價（全屋整租，按你查到的4房同區comparable）</td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥30,500</span><span class="amt-h">HK$1,501</span></div></td>
+              <td class="amt-cell mid"><div class="amt"><span class="amt-y">¥40,700</span><span class="amt-h">HK$2,002</span></div></td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥50,800</span><span class="amt-h">HK$2,499</span></div></td>
+            </tr>
+            <tr class="assump">
+              <td class="item">入住率（180日內）</td>
+              <td class="amt-cell">50%・90晚</td>
+              <td class="amt-cell mid">60%・108晚</td>
+              <td class="amt-cell">70%・126晚</td>
+            </tr>
+            <tr class="rev">
+              <td class="item">年租金總收入</td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥2,745,000</span><span class="amt-h">HK$135,054</span></div></td>
+              <td class="amt-cell mid"><div class="amt"><span class="amt-y">¥4,395,600</span><span class="amt-h">HK$216,264</span></div></td>
+              <td class="amt-cell"><div class="amt"><span class="amt-y">¥6,400,800</span><span class="amt-h">HK$314,919</span></div></td>
+            </tr>
+            <tr>
+              <td class="item">Airbnb平台費 3%</td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥82,350</span><span class="amt-h">−HK$4,052</span></div></td>
+              <td class="amt-cell mid"><div class="amt neg"><span class="amt-y">−¥131,868</span><span class="amt-h">−HK$6,488</span></div></td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥192,024</span><span class="amt-h">−HK$9,448</span></div></td>
+            </tr>
+            <tr>
+              <td class="item">管理公司費 30%</td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥823,500</span><span class="amt-h">−HK$40,516</span></div></td>
+              <td class="amt-cell mid"><div class="amt neg"><span class="amt-y">−¥1,318,680</span><span class="amt-h">−HK$64,879</span></div></td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥1,920,240</span><span class="amt-h">−HK$94,476</span></div></td>
+            </tr>
+            <tr>
+              <td class="item">年度雜項開支</td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥250,000</span><span class="amt-h">−HK$12,300</span></div></td>
+              <td class="amt-cell mid"><div class="amt neg"><span class="amt-y">−¥250,000</span><span class="amt-h">−HK$12,300</span></div></td>
+              <td class="amt-cell"><div class="amt neg"><span class="amt-y">−¥250,000</span><span class="amt-h">−HK$12,300</span></div></td>
+            </tr>
+            <tr class="net">
+              <td class="item">年淨回報</td>
+              <td class="amt-cell"><div class="amt pos"><span class="amt-y">¥1,589,150</span><span class="amt-h">HK$78,186</span></div></td>
+              <td class="amt-cell mid"><div class="amt pos"><span class="amt-y">¥2,695,052</span><span class="amt-h">HK$132,597</span></div></td>
+              <td class="amt-cell"><div class="amt pos"><span class="amt-y">¥4,038,536</span><span class="amt-h">HK$198,696</span></div></td>
+            </tr>
+            <tr class="yieldrow">
+              <td class="item">回報率（年淨回報 ÷ 總投資）</td>
+              <td class="amt-cell"><span class="pct">37.6%</span></td>
+              <td class="amt-cell mid"><span class="pct">63.7%</span></td>
+              <td class="amt-cell"><span class="pct">95.5%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>四、年度雜項開支明細（三情境共同假設）</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>項目</th><th>日圓</th><th>港幣（約）</th></tr></thead>
+          <tbody>
+            <tr><td>水電煤・暖氣（北海道冬季用量較高）</td><td class="jpy">≈ ¥120,000</td><td class="hkd">≈ HK$5,904</td></tr>
+            <tr><td>火險・地震險・住客責任保險</td><td class="jpy">≈ ¥40,000</td><td class="hkd">≈ HK$1,968</td></tr>
+            <tr><td>固定資産税＋都市計画税</td><td class="jpy">≈ ¥20,000</td><td class="hkd">≈ HK$984</td></tr>
+            <tr><td>納税管理人年度代理費</td><td class="jpy">≈ ¥50,000</td><td class="hkd">≈ HK$2,460</td></tr>
+            <tr><td>寢具更換、消耗品備用金</td><td class="jpy">≈ ¥20,000</td><td class="hkd">≈ HK$984</td></tr>
+            <tr class="total"><td>年度雜項開支合計</td><td class="jpy">¥250,000</td><td class="hkd">HK$12,300</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>五、需要先確認的關鍵假設</h2>
+      <div class="callout">
+        <strong>基本翻新的¥2,730,000仍是估算</strong> — 淘寶家具及集運價格波動較大，建議落單前先向2–3間集運公司查詢實際到岸價，尤其大件家具（梳化、床架）的海運報價。<br><br>
+        <strong>淘寶家具的到貨時間需計入裝修排期</strong> — 海運到小樽港一般需4–8星期，加上本地送貨及組裝，應預留至少2個月緩衝期，避免延誤開業。<br><br>
+        <strong>每晚房價已按你查到的同區4房comparable上調至¥30,500–50,800（HK$1,500–2,500）</strong> — 惟物件無停車位、須駕車1.3公里往返小樽站，與運河沿岸condo comparable的地段吸引力不同，實際掛牌價未必等於實際成交入住率，仍應以同類全屋（非condo）物業為準核實。<br><br>
+        <strong>回報率63.7%（中等情境）明顯偏高，建議謹慎看待</strong> — 高單價物業通常伴隨較低入住率（能負擔$2,000+/晚的旅客較少），現時60%入住率的假設可能過於樂觀；建議查看該些comparable listing的實際評論數量／訂房日曆滿座程度，而非只看掛牌價，以更準確估算真實入住率。<br><br>
+        <strong>管理費30%已假設為連清潔的全包價</strong> — 簽約前須確認是否連OTA代管費，以及清潔費是否另外向住客收取。<br><br>
+        <strong>消防用設備¥180,000為小型家主不在型規模估算</strong> — 實際金額視乎消防署現場勘察結果，若被要求加裝自動火災報知設備等級別更高的設備，成本會相應上升。
+      </div>
+    </section>
+
+  </section>
+
+</main>
+
+<footer>
+  <p>本頁面所有金額為根據小樽市石山町物業（成交價¥1,100,000，1979年5月建成，土地102.9㎡，建物107.46㎡，5LDK）的公開資料及市場行情推算，僅供個人投資規劃參考，並非税務或法律意見，實際申請及費用請以地產代理、司法書士及北海道住宅宿泊事業主管部門的最終確認為準。日圓兌港幣匯率參考2026年8月28日中間價 ¥1 ≈ HK$0.0492。</p>
+</footer>
+
+<script>
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(function(el) {
+      el.classList.toggle('active', el.id === 'page-' + name);
+    });
+    document.querySelectorAll('nav.tabs button').forEach(function(btn) {
+      btn.setAttribute('aria-selected', btn.id === 'tab-' + name ? 'true' : 'false');
+    });
+    try { sessionStorage.setItem('otaru_minpaku_tab', name); } catch (e) {}
+  }
+  (function () {
+    var saved;
+    try { saved = sessionStorage.getItem('otaru_minpaku_tab'); } catch (e) {}
+    if (saved === 'finance') showPage('finance');
+  })();
+</script>
