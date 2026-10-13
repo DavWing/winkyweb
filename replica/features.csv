@@ -1,21 +1,21 @@
 feature,area,priority,original,clone,notes
-Sign in (owner only),onboarding,must,yes,no,single user; no public sign-up
+Sign in (owner only),onboarding,must,yes,partial,"single user; no public sign-up; email-link sign-in, owner-only gate, sign out everywhere; built and offline-tested, live sign-in not yet tried"
 App shell with icon rail,shell,must,yes,yes,S03-S16; bottom tab bar on phones
 Conversation list with search and sections,messaging,must,yes,yes,"S03; S03: pinned and chats sections, local search, empty and no-match states"
-Chat with an agent (streaming replies in markdown),messaging,must,yes,partial,"S04; streaming, paragraphs, lists and bold work; replies are a labelled demo until the Claude API is connected"
+Chat with an agent (streaming replies in markdown),messaging,must,yes,partial,"S04; streaming, paragraphs, lists and bold work; Claude runner built and mock-tested; needs ANTHROPIC_API_KEY for real replies"
 Long message collapse and expand,messaging,must,yes,yes,"S04; collapses by rendered height, not character count"
 Composer with attachments and send,messaging,must,yes,partial,"S05; send, Enter / Shift+Enter, retry on failure done; attachments not yet"
 Agent directory with categories and Chat button,agents,must,yes,yes,"S08; S08: search, ready-made / mine, categories, Chat starts or reopens the chat"
 Create and edit my own agent,agents,must,yes,no,S10
-Agent produces a web page shown as an artifact card,artifacts,must,yes,partial,"S06; core loop; plan card, sandboxed preview card and Stop work; the page itself is a demo template until the Claude API is connected"
+Agent produces a web page shown as an artifact card,artifacts,must,yes,partial,"S06; core loop; plan card, sandboxed preview card and Stop work; create_web_page tool built and mock-tested; live run pending the API key"
 Open an artifact full screen,artifacts,must,yes,yes,"S17; S17, sandboxed iframe without same-origin"
 Artifacts library by type with recent and starred,artifacts,must,yes,no,S16
 Memory wiki pages with topics and tags,memory,must,yes,no,S13
-Agents read memory in every chat,memory,must,yes,no,context across chats
+Agents read memory in every chat,memory,must,yes,partial,context across chats; memory index in every prompt + search/read tools; no memory screens yet
 Pin chats,messaging,should,yes,yes,S03; pin / unpin on each row
 Group chat with several agents,messaging,should,yes,partial,S03 group avatars; group chats with @mention picker and only-mentioned-agents-answer work; creating a group not yet
 Agent Teams (prebuilt groups),agents,should,yes,no,S08 tab
-Agents write and update memory pages,memory,should,yes,no,
+Agents write and update memory pages,memory,should,yes,partial,memory_write with [[links]]; no memory screens yet
 Memory graph view with links and stats,memory,should,yes,no,S13
 Memory special pages (profile next actions outputs),memory,should,yes,no,S13
 Automations from templates (Work and Life),automations,should,yes,no,S11
