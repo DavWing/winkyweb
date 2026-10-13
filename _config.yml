@@ -113,3 +113,10 @@ category_archive:
 tag_archive:
   type: liquid
   path: /tags/
+
+exclude:
+  - replica/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/

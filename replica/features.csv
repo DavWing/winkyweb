@@ -1,0 +1,35 @@
+feature,area,priority,original,clone,notes
+Sign up and sign in (email and Google),onboarding,must,yes,no,login methods not confirmed
+Conversation list with DMs groups and agents,messaging,must,yes,no,
+1:1 chat with a person,messaging,must,yes,no,
+1:1 chat with an agent (streaming replies),messaging,must,yes,no,
+Group chat with humans and agents as members,messaging,must,yes,no,core loop
+@mention an agent in a group,agents,must,yes,no,core loop
+Create a custom agent from a prompt,agents,must,yes,no,"+ New Agent"
+Agent task with visible plan and progress in thread,tasks,must,yes,no,from Forbes demo
+Chat continues while a task runs,tasks,must,yes,no,
+Realtime delivery typing and unread counts,messaging,must,yes,no,typing and unread inferred
+Invite to group by link,groups,must,yes,no,/invite/group/{id}
+Images and file attachments,messaging,must,yes,no,
+Plan limits (agents and concurrent tasks),billing,must,yes,no,Free 5 agents 2 tasks
+Memory that carries across chats,agents,should,yes,no,privacy rules needed
+Edit and delete an agent,agents,should,yes,no,
+Group settings (rename members add or remove agent),groups,should,yes,no,
+Voice message input,messaging,should,yes,no,
+Built-in translation,messaging,should,yes,no,from listing
+Credits metering and usage limit modal,billing,should,yes,no,amounts unverified
+Paid plans with trial and checkout,billing,should,yes,no,Plus has a 3-day trial
+Sponsor a group's AI usage,billing,should,yes,no,from pricing page
+Search messages and chats,messaging,should,unknown,no,not confirmed
+Connectors (Gmail GitHub Slack) via official APIs,integrations,could,yes,no,
+Public agent profile page,agents,could,yes,no,changelog
+View and edit memories,agents,could,unknown,no,may not exist
+Studio: web app builder with live preview,studios,could,yes,no,big
+Studio: slides docs dashboards,studios,could,yes,no,big
+Shared docs and whiteboard artifacts,studios,could,yes,no,v2.0.8
+Voice and video calls and meetings,calls,could,yes,no,big
+Desktop and mobile apps,platforms,could,yes,no,web first
+Agent Hub and Slack channel publishing,integrations,skip,yes,skip,partner-facing; rebuild later if needed
+Teamily's public agents and users,network,skip,yes,skip,the network is not part of the product
+Ad-supported credits,billing,skip,yes,skip,needs an ad network deal
+AI video generation,studios,skip,yes,skip,Pro-only; depends on a third-party model deal
