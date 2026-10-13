@@ -1,35 +1,41 @@
 feature,area,priority,original,clone,notes
-Sign up and sign in (email and Google),onboarding,must,yes,no,login methods not confirmed
-Conversation list with DMs groups and agents,messaging,must,yes,no,
-1:1 chat with a person,messaging,must,yes,no,
-1:1 chat with an agent (streaming replies),messaging,must,yes,no,
-Group chat with humans and agents as members,messaging,must,yes,no,core loop
-@mention an agent in a group,agents,must,yes,no,core loop
-Create a custom agent from a prompt,agents,must,yes,no,"+ New Agent"
-Agent task with visible plan and progress in thread,tasks,must,yes,no,from Forbes demo
-Chat continues while a task runs,tasks,must,yes,no,
-Realtime delivery typing and unread counts,messaging,must,yes,no,typing and unread inferred
-Invite to group by link,groups,must,yes,no,/invite/group/{id}
-Images and file attachments,messaging,must,yes,no,
-Plan limits (agents and concurrent tasks),billing,must,yes,no,Free 5 agents 2 tasks
-Memory that carries across chats,agents,should,yes,no,privacy rules needed
-Edit and delete an agent,agents,should,yes,no,
-Group settings (rename members add or remove agent),groups,should,yes,no,
-Voice message input,messaging,should,yes,no,
-Built-in translation,messaging,should,yes,no,from listing
-Credits metering and usage limit modal,billing,should,yes,no,amounts unverified
-Paid plans with trial and checkout,billing,should,yes,no,Plus has a 3-day trial
-Sponsor a group's AI usage,billing,should,yes,no,from pricing page
-Search messages and chats,messaging,should,unknown,no,not confirmed
-Connectors (Gmail GitHub Slack) via official APIs,integrations,could,yes,no,
-Public agent profile page,agents,could,yes,no,changelog
-View and edit memories,agents,could,unknown,no,may not exist
-Studio: web app builder with live preview,studios,could,yes,no,big
-Studio: slides docs dashboards,studios,could,yes,no,big
-Shared docs and whiteboard artifacts,studios,could,yes,no,v2.0.8
-Voice and video calls and meetings,calls,could,yes,no,big
-Desktop and mobile apps,platforms,could,yes,no,web first
-Agent Hub and Slack channel publishing,integrations,skip,yes,skip,partner-facing; rebuild later if needed
-Teamily's public agents and users,network,skip,yes,skip,the network is not part of the product
-Ad-supported credits,billing,skip,yes,skip,needs an ad network deal
-AI video generation,studios,skip,yes,skip,Pro-only; depends on a third-party model deal
+Sign in (owner only),onboarding,must,yes,no,single user; no public sign-up
+App shell with icon rail,shell,must,yes,no,S03-S16
+Conversation list with search and sections,messaging,must,yes,no,S03
+Chat with an agent (streaming replies in markdown),messaging,must,yes,no,S04
+Long message collapse and expand,messaging,must,yes,no,S04
+Composer with attachments and send,messaging,must,yes,no,S05
+Agent directory with categories and Chat button,agents,must,yes,no,S08
+Create and edit my own agent,agents,must,yes,no,S10
+Agent produces a web page shown as an artifact card,artifacts,must,yes,no,S06; core loop
+Open an artifact full screen,artifacts,must,yes,no,S17
+Artifacts library by type with recent and starred,artifacts,must,yes,no,S16
+Memory wiki pages with topics and tags,memory,must,yes,no,S13
+Agents read memory in every chat,memory,must,yes,no,context across chats
+Pin chats,messaging,should,yes,no,S03
+Group chat with several agents,messaging,should,yes,no,S03 group avatars
+Agent Teams (prebuilt groups),agents,should,yes,no,S08 tab
+Agents write and update memory pages,memory,should,yes,no,
+Memory graph view with links and stats,memory,should,yes,no,S13
+Memory special pages (profile next actions outputs),memory,should,yes,no,S13
+Automations from templates (Work and Life),automations,should,yes,no,S11
+Automation scheduler posting results to a chat,automations,should,yes,no,S12 inferred
+Save a chat message as an artifact,artifacts,should,yes,no,right-click
+New blank cloud doc,artifacts,should,yes,no,S16
+Voice input (mic),messaging,should,yes,no,S05
+Model mode selector (Instant etc),messaging,should,yes,no,S05
+Tools and connectors on agents (Gmail GitHub Slack),integrations,could,yes,no,official APIs only
+Prompt enhance button,messaging,could,yes,no,sparkle in S05
+Search inside a chat,messaging,could,yes,no,S04 header
+Agent workspace panel,agents,could,yes,no,S07 not seen
+Explore page,discovery,could,yes,no,S15 not seen
+Invite people to a chat,groups,could,yes,no,owner-only tool may not need it
+Language switch,settings,could,yes,no,
+Images video and audio artifacts,artifacts,could,yes,no,
+Grid and list view toggle,artifacts,could,yes,no,S16
+Plans billing trial banner and gifts,billing,skip,yes,skip,private tool needs no billing
+Teamily's built-in agent catalogue content,agents,skip,yes,skip,write your own agents
+Teamily brand logo mascot illustrations wallpaper,brand,skip,yes,skip,owned by Teamily
+Calls meetings and office suite,calls,skip,yes,skip,out of first build
+Agent Hub and Slack channel publishing,integrations,skip,yes,skip,
+Desktop and mobile apps,platforms,skip,yes,skip,web first

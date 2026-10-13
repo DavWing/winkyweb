@@ -1,220 +1,237 @@
 # Recon map: Teamily AI (web, teamily.ai/chat)
 
-Scope: the core messenger loop. Direct messages and group chats where humans
-and custom AI agents are both members, plus @mentioning an agent to run a task
-with a visible plan, and memory that carries across chats. Studios (web apps,
-slides, docs, dashboards), calls, office suite and Agent Hub are listed but
-set to could or skip.
-For: TBD (to confirm with the owner)
+Scope: the core loop (chat with your own AI agents, one-on-one and in
+groups) plus the four areas seen in the owner's screenshots: the agent
+directory, automations, memory (a personal wiki with a graph view) and
+artifacts. Calls, office suite, Agent Hub and mobile apps are out of the
+first build.
+For: the owner's own use (a private, single-owner tool, not a product to sell
+yet). That means no billing, no plans, no public sign-up in v1; see Size.
 Date: 2026-10-13
 
-> **Confidence warning.** This environment's network policy blocked
-> teamily.ai and every third-party page, so nothing below comes from looking
-> at the app. It is built from web-search summaries of the sources listed.
-> No screenshots were taken. Screens, routes and components are inferred and
-> marked as such. Before building, walk through the app in your own account
-> and correct this file (Step "Gaps to close" at the bottom).
+> **Confidence.** Five screens come from the owner's own screenshots
+> (`screens/`, not committed). The rest is from public sources via web search;
+> teamily.ai itself is blocked by this environment's network policy. Rows
+> marked *seen* are from screenshots; *inferred* rows are not.
 
 ## Sources
 
 | # | source | URL | notes |
 | --- | --- | --- | --- |
-| 1 | web app (target) | https://teamily.ai/chat | blocked from this environment, not seen |
-| 2 | marketing site | https://teamily.ai/ | "always-on agents ... one unified and context-aware space" |
-| 3 | about page | https://teamily.ai/about | "+ New Agent" button, agent shows in contact list, prompt-built agents |
-| 4 | pricing page | https://teamily.ai/pricing | Free / Plus $19.99 / Premium $99.99 / Pro $199.99 |
-| 5 | changelog | https://teamily.ai/changelog | web-v2.0.2: Studio webapp builder, Agent Hub, public agent profiles |
-| 6 | help center | https://teamily.ai/about/help-center | not reached, highest-value gap |
-| 7 | group invite page | https://teamily.ai/invite/group/3176557915 | invite link pattern `/invite/group/{id}` |
-| 8 | download page | https://teamily.ai/download | iOS, Android, Mac, Windows |
-| 9 | App Store listing | https://apps.apple.com/us/app/teamily-ai-human-ai-team/id6761445638 | feature list, v2.0.8 "Artifacts: Shared Docs, Whiteboard" |
-| 10 | Google Play listing | https://play.google.com/store/apps/details?id=ai.teamily.mobile | Productivity, free with IAP |
-| 11 | blog: agent teams | https://blog.teamily.ai/teamily-ai-brings-agent-teams-to-human-teams/ | agents as named group members, mention, assign, parallel jobs |
-| 12 | blog: what is Teamily | https://blog.teamily.ai/what-is-teamily-ai/ | positioning, global memory |
-| 13 | Forbes | https://www.forbes.com/sites/charliefink/2026/03/06/teamily-ai-brings-agent-teams-to-human-teams/ | demo: tasks split into subtasks, visible execution plan in chat |
-| 14 | public launch PR | https://www.businesswire.com/news/home/20260708584390/en/Teamily-AI-Publicly-Launches-HumanAI-Social-Platform-to-Make-Building-and-Growing-a-Company-Easy-for-Every-Team | July 2026 launch |
-| 15 | directory listing | https://www.aitoolsspace.com/en/tools/teamily | credit amounts per tier (unverified) |
-| 16 | critical coverage | https://ucstrategies.com/news/teamily-raised-20m-betting-people-will-pay-to-keep-ai-group-conversations-going/ | usage limits, ads or upgrade on free |
+| 1 | owner's account, 5 screenshots | `replica/screens/` | chat thread, agent directory, automations, memory, artifacts. UI in Traditional Chinese |
+| 2 | web app | https://teamily.ai/chat | blocked from this environment |
+| 3 | marketing site | https://teamily.ai/ | "always-on agents ... one unified and context-aware space" |
+| 4 | about page | https://teamily.ai/about | "+ New Agent", prompt-built agents |
+| 5 | pricing | https://teamily.ai/pricing | Free / Plus $19.99 / Premium $99.99 / Pro $199.99 |
+| 6 | changelog | https://teamily.ai/changelog | Studio webapp builder, Agent Hub, public agent profiles |
+| 7 | help center | https://teamily.ai/about/help-center | not reached |
+| 8 | invite page | https://teamily.ai/invite/group/3176557915 | `/invite/group/{id}` |
+| 9 | App Store | https://apps.apple.com/us/app/teamily-ai-human-ai-team/id6761445638 | v2.0.8 "Artifacts: Shared Docs, Whiteboard" |
+| 10 | Google Play | https://play.google.com/store/apps/details?id=ai.teamily.mobile | |
+| 11 | blog: agent teams | https://blog.teamily.ai/teamily-ai-brings-agent-teams-to-human-teams/ | agents as named group members |
+| 12 | Forbes | https://www.forbes.com/sites/charliefink/2026/03/06/teamily-ai-brings-agent-teams-to-human-teams/ | tasks split into subtasks, visible plan |
+| 13 | launch PR | https://www.businesswire.com/news/home/20260708584390/en/Teamily-AI-Publicly-Launches-HumanAI-Social-Platform-to-Make-Building-and-Growing-a-Company-Easy-for-Every-Team | July 2026 |
 
 ## Core loop
 
-You chat in a group with people and your own AI agents; you @mention an agent,
-it plans and runs the task in the thread while everyone keeps talking, and it
-remembers context from every chat.
+You message an agent (or a group of agents and people), it answers in the
+thread and produces deliverables (web pages, docs) as cards you can open,
+and what it learns is filed into your memory wiki for every later chat.
+
+## App shell (seen, all 5 screenshots)
+
+Left icon rail, top to bottom: logo; Chats; Agents; Automations; Explore
+(compass); Memory (brain); Artifacts (layers); Contacts/profile (person).
+Bottom: Download apps; Language (globe); plan label "FREE"; Gifts (badge
+count); own avatar. Active item has a pale green tile. Accent colour is a
+saturated green; surfaces are white and very light grey; cards have large
+radius and no visible border.
 
 ## Screens
 
-All routes except `/chat`, `/pricing`, `/invite/group/{id}` are guesses.
-
-| ID | screen | route / how to reach | purpose | key components | states seen |
-| --- | --- | --- | --- | --- | --- |
-| S01 | Sign in / sign up | `/login` (guess), redirect from `/chat` when signed out | create account, sign in | auth form, OAuth buttons | not seen |
-| S02 | Onboarding | after first sign-up (guess) | name, avatar, first agent | stepper, avatar picker | not seen |
-| S03 | Chat home (conversation list + empty pane) | `/chat` | list of DMs, groups, agents; pick one | sidebar nav, search, conversation list, "new" menu | not seen; need empty (new user) and filled |
-| S04 | Conversation thread (DM) | `/chat/{id}` (guess) | 1:1 with a person or an agent | message list, composer, attachments, voice input | not seen |
-| S05 | Conversation thread (group) | `/chat/{id}` (guess) | humans + agents together | member avatars, @mention picker, task cards | not seen |
-| S06 | Task / execution plan card | inline in S05 | agent shows plan, steps, progress, result | step list, progress, status chips, result attachment | inferred from Forbes demo |
-| S07 | New group | "new" menu in S03 | pick members and agents, name group | member picker, name input | not seen |
-| S08 | Group info / settings | header of S05 | members, add agent, invite link, sponsor AI usage | member list, invite link copy, toggles | inferred from pricing ("sponsor your group's AI usage") |
-| S09 | Invite landing | `/invite/group/{id}` | accept invite, join group | group preview, join button | page exists, contents not seen |
-| S10 | Contacts / agents list | sidebar tab (guess) | people and agents you can message | list, "+ New Agent" | inferred from about page |
-| S11 | Create / edit agent | "+ New Agent" | name, avatar, prompt, skills, connectors | form, prompt textarea, toggles | inferred |
-| S12 | Agent profile (public) | profile page (changelog) | public page for an agent | avatar, description, start chat | inferred from changelog |
-| S13 | Memory view | settings or sidebar (guess) | see and edit what agents remember | list of memories, delete | guess; may not exist as a screen |
-| S14 | Settings / account | avatar menu | profile, language, connectors, plan | tabs, forms | not seen |
-| S15 | Plans / upgrade | `/pricing`, upgrade prompts | Free, Plus, Premium, Pro | plan cards, checkout | page exists, layout not seen |
-| S16 | Usage limit / paywall modal | when credits run out | upgrade or watch ad (mobile) | modal, plan CTA | inferred from coverage |
-| S17 | Studio (web app / slides / docs) | from a task result | edit an artifact with agents | editor, live preview, share link | out of core scope |
+| ID | screen | route / how to reach | purpose | key components | states seen | source |
+| --- | --- | --- | --- | --- | --- | --- |
+| S01 | Sign in / sign up | redirect from `/chat` | account | auth form | none | inferred |
+| S02 | Onboarding | first sign-in | seeds starter wiki pages and a "Teamily Agent" friend | | none | inferred from S13 "Getting Started" pages, S03 "you're now friends" |
+| S03 | Conversation list | rail: Chats, `/chat` | all chats | search, green "+" (new), promo row at top, Pinned section with count + collapse, Chats section with count + collapse, rows with avatar, name, verified badge, last message preview, day or time | filled, pinned, selected row (green tint) | seen |
+| S04 | Chat thread | select a row in S03 | talk to an agent or group | header (avatar, name, Invite, Agent workspace, search, more), doodle wallpaper, own bubble (green, right), agent message with name above, long-message collapse ("show less"), "Demo" tag, artifact card in message, upsell banner (3-day Plus trial, dismiss), composer | filled, long message collapsed/expanded, upsell banner | seen |
+| S05 | Composer (part of S04) | bottom of S04 | write and send | multi-line input, expand, attach "+", tools (wrench), connectors (plug), mode select "Instant", prompt-enhance (sparkle), voice wave, scissors (unknown), text format, emoji, mic button | empty | seen |
+| S06 | Artifact preview card | inside S04 agent message | open a deliverable inline | title, type badge "WEB", copy link, embedded preview with its own tab nav, expand to full | loaded | seen |
+| S07 | Agent workspace | "Agent workspace" button in S04 header | agent's tasks, files and settings for this chat | | none | inferred, needs a screenshot |
+| S08 | Agent directory | rail: Agents | browse and start agents | search, "+ Create my agent", top tabs Agents / Agent Teams, source filter "By Teamily AI" / "My agents", category chips (All, Content Creation, Customer Support, Data Analysis, Design, Education, Engineering, Finance, IT & Security, Investment, Legal, Life, Marketing, more), 3-column cards (avatar, name, 2-line description, green "Chat" button) | filled | seen |
+| S09 | Agent Teams | tab in S08 | prebuilt multi-agent groups (e.g. "Paid Search & Social", "Ad Creative Studio" in S03) | | none | inferred |
+| S10 | Create / edit agent | "+ Create my agent" | name, avatar, prompt, tools | | none | inferred |
+| S11 | Automations | rail: Automations | recurring agent jobs from templates | title, search, tabs My automations / Work / Life, 3-column template cards (icon, title, one-line description) | filled (Work tab) | seen |
+| S12 | Automation setup | click a template in S11 | pick agent, schedule, inputs | | none | inferred |
+| S13 | Memory overview | rail: Memory | personal wiki of everything agents learned | left: search topics, filter All/Updated/Tags, "+ New"; fixed entries Overview, My profile, Next actions, My outputs; pages grouped by topic with collapse (Uncategorized, Getting Started), each page with title, excerpt, time ago, #tags. Main: stats row (nodes, links, unlinked, topics), search, topic chips with counts, graph canvas with zoom/reset, right panel tabs Topic highlights / Recently updated, hint "click to view, double-click to open, hover to preview" | filled (4 pages) | seen |
+| S14 | Memory page | double-click a node or a page in S13 | read and edit one wiki page | | none | inferred |
+| S15 | Explore | rail: compass | discover public agents or content | | none | inferred, needs a screenshot |
+| S16 | Artifacts | rail: Artifacts | everything created or saved | left: title, "+ New" dropdown, search, types Overview / Websites / Docs (docs, slides, PDF) / Photos & video (image, video, audio) / Messages. Main: tabs Recently used / Recently starred, grid/list toggle, notifications bell, filter | empty state with 3 actions: new cloud doc, let an agent build a website, save a chat message (right-click a message, "Add to my Artifacts") | seen |
+| S17 | Artifact viewer / editor | open from S06 or S16 | view, edit, share | | none | inferred |
+| S18 | Settings / profile | rail: avatar | profile, language, connectors | | none | inferred |
+| S19 | Invite | "Invite" in S04, `/invite/group/{id}` | add people to a chat | | none | inferred |
 
 ## Flows
 
 ```
-F01 New user starts chatting with an agent
-    S01 -> S02 -> S03 -> S04
-    happy path clicks: unknown (estimate 5-7)
-    edge: OAuth cancelled, email already used, no agents yet (empty state)
+F01 Chat with an agent from the directory
+    S08 -> click "Chat" on a card -> S04 (new chat appears in S03)
+    happy path clicks: 2
+    edge: agent already in your chats (open existing), category with no agents
 
-F02 Create a custom agent
-    S03 -> S10 -> S11 -> S04 (agent DM opens)
-    happy path clicks: ~4 ("+ New Agent", name, prompt, save)
-    edge: free plan at 5-agent limit, empty prompt, duplicate name
+F02 Create my own agent
+    S08 -> "+ Create my agent" -> S10 -> save -> S04
+    happy path clicks: ~4 plus typing
+    edge: empty prompt, duplicate name
 
-F03 Start a group with people and agents
-    S03 -> S07 -> S05
-    happy path clicks: ~5
-    edge: inviting someone not on the app (invite link), group size limit per plan
+F03 Ask an agent for a deliverable (the core loop)
+    S04: type in S05 -> send -> agent replies with S06 card -> expand -> S17
+    happy path clicks: 2 plus typing
+    edge: long prompt (collapsed in the thread), generation fails, preview fails to load
 
-F04 Invite someone by link
-    S05 -> S08 (copy link) ... invitee: S09 -> S01 (if signed out) -> S05
-    edge: expired / revoked link, already a member, signed-out invitee
+F04 Group with several agents
+    S03 "+" -> new group -> pick agents (and people) -> S04 with group avatar
+    happy path clicks: ~4
+    edge: two agents answer at once, mention routing
 
-F05 @mention an agent to run a task (the core loop)
-    S05: type "@" -> pick agent -> write request -> send -> S06 plan appears
-         -> steps run while chat continues -> result posted
-    happy path clicks: 3 + typing
-    edge: concurrent-task limit hit (2 on free), credits out (S16), task fails
-          mid-plan, two agents mentioned at once, someone else cancels
+F05 Set up an automation
+    S11 -> pick a template (e.g. "Daily work brief") -> S12 -> save -> appears under "My automations"
+    happy path clicks: ~3
+    edge: schedule in another time zone, the agent's run fails, pausing
 
-F06 Agent recalls context from another chat
-    S04/S05: ask about something said elsewhere -> agent answers using memory
-    edge: memory from a group the asker is not in (privacy), user deletes a memory
+F06 Browse and edit memory
+    S13 -> click a node (preview) -> double-click (open S14) -> edit -> save
+    happy path clicks: 3
+    edge: unlinked pages, deleting a page that others link to, conflicting facts
 
-F07 Upgrade
-    S16 or S14 -> S15 -> checkout -> back to S05 with limit lifted
-    edge: trial (3 days on Plus), payment fails, downgrade over agent limit
+F07 Save a chat message as an artifact
+    S04 -> right-click a message -> "Add to my Artifacts" -> S16 Messages
+    happy path clicks: 2
+    edge: saving a message twice
+
+F08 Pin a chat
+    S03 row menu -> Pin -> row moves to Pinned
+    happy path clicks: 2
 ```
 
 ## Components
 
 | component | variants | states | used on |
 | --- | --- | --- | --- |
-| Button | primary, secondary, ghost, danger, icon | default, hover, focus, disabled, loading | all |
-| Sidebar nav | chats, contacts/agents, settings (guess) | active, collapsed (mobile) | S03-S05, S10 |
-| Conversation list item | DM, group, agent | unread, active, muted, typing | S03 |
-| Message bubble | own, other human, agent, system | sending, sent, failed, streaming (agent) | S04, S05 |
-| Composer | text, with attachment, voice | empty, typing, @mention open, disabled (limit) | S04, S05 |
-| Mention picker | humans, agents | filtered, empty | S05 |
-| Task / plan card | running, done, failed, cancelled | step pending/running/done | S05, S06 |
-| Avatar | human, agent (with badge), group stack | online, offline | everywhere |
-| Member picker | people, agents | selected, disabled (limit) | S07, S08 |
-| Modal | confirm, paywall, invite | open, closed | S08, S16 |
-| Toast | success, error, info | | all |
-| Plan card | Free, Plus, Premium, Pro | current, recommended | S15 |
-| Form fields | text, textarea, toggle, select, file | default, focus, error, disabled | S01, S11, S14 |
+| Icon rail item | nav, utility (download, language), gift with badge, avatar | default, hover, active (green tile) | all |
+| Button | primary pill (green), secondary pill (light grey), icon, round icon (green "+", green mic) | default, hover, disabled | all |
+| Search field | pill, large (directory), small (sidebar) | empty, typing | S03, S08, S11, S13, S16 |
+| Section header | with count and collapse chevron | open, collapsed | S03, S13 |
+| Conversation row | agent, group (stacked avatars), pinned, promo | default, selected, unread | S03 |
+| Avatar | agent (illustrated), group stack, with small status badge | | S03, S04, S08 |
+| Verified badge | | | S03 |
+| Message bubble | own (green), agent (plain, name above) | collapsed, expanded, streaming | S04 |
+| Artifact card | web, doc, image | loading, loaded, expanded | S04, S16 |
+| Upsell banner | trial offer | shown, dismissed | S04 |
+| Composer | | empty, typing, recording | S04 |
+| Mode select | "Instant" plus others (unknown) | | S05 |
+| Tabs | underline (Agents / Agent Teams, Highlights / Recent), pill (My / Work / Life) | active, inactive | S08, S11, S13, S16 |
+| Chip | category filter, topic filter with count | active (green), inactive | S08, S13 |
+| Agent card | | default, hover | S08 |
+| Template card | icon in pale green circle, title, description | default, hover | S11 |
+| Wiki page row | title, excerpt, time ago, #tags | default, selected | S13 |
+| Stat | number + label (warning colour for "unlinked") | | S13 |
+| Graph canvas | nodes (green = linked, grey = unlinked), edges, zoom controls | idle, hover preview | S13 |
+| Empty state | icon, title, text, action rows with green arrow button | | S16 |
+| View toggle | grid / list | | S16 |
 
 ## Inferred data model
 
 ```
-User         id, name, avatar_url, email, plan (free|plus|premium|pro),
-             credits_balance, created_at
-             evidence: pricing page, directory credit amounts
-             confidence: high (user, plan) / medium (credits)
-
-Agent        id, owner_id -> User, name, avatar_url, system_prompt, model,
-             skills[] / connectors[], is_public, created_at
-             evidence: about page ("+ New Agent", prompt-built), pricing (agent
-             limits, connectors), changelog (public agent profiles)
-             confidence: high (existence) / guess (field list)
-
-Conversation id, kind (dm | group), title, avatar_url, created_by,
-             sponsor_user_id (who pays the group's AI usage), created_at
-             evidence: pricing ("sponsor your group's AI usage"), invite page
-             confidence: high (kind) / medium (sponsor)
-
-Member       conversation_id, member_type (user | agent), member_id,
-             role (owner | admin | member), joined_at, last_read_message_id
-             evidence: blog ("agents appear as named members")
+User         id, name, avatar_url, locale, plan, created_at
+             evidence: S18 rail avatar, "FREE" label, language button
              confidence: high
 
-Message      id, conversation_id, sender_type (user | agent | system), sender_id,
-             body, attachments (json), mentions[], reply_to_id, task_id,
-             created_at, edited_at
-             evidence: App Store (text, voice, images, files)
-             confidence: high
+Agent        id, owner_id (null = built-in), name, avatar_url, description,
+             category, system_prompt, model, tools[], connectors[],
+             is_public, verified
+             evidence: S08 cards and categories, "By Teamily AI" / "My agents",
+             S03 verified badge, S05 tools and connectors buttons
+             confidence: high (fields shown) / guess (prompt, tools)
 
-Task         id, conversation_id, agent_id, requested_by, prompt,
-             status (queued | running | done | failed | cancelled),
-             plan (json: steps with status), result_artifact_id,
-             credits_used, started_at, finished_at
-             evidence: Forbes demo (decomposed subtasks, visible plan),
-             pricing (concurrent task limits)
+AgentTeam    id, name, description, agent_ids[]
+             evidence: S08 "Agent Teams" tab, S03 group chats of agents
              confidence: medium
 
-Memory       id, owner (user | agent), source_conversation_id, content,
-             embedding, created_at, updated_at
-             evidence: "living memory that builds and reorganizes itself"
-             confidence: guess (structure)
-
-Invite       id / code, conversation_id, created_by, expires_at, revoked
-             evidence: /invite/group/{id}
-             confidence: medium
-
-Artifact     id, kind (webapp | slides | doc | dashboard | whiteboard),
-             conversation_id, created_by_task_id, share_url, content
-             evidence: studios, v2.0.8 "Artifacts: Shared Docs, Whiteboard"
-             confidence: medium (out of core scope)
-
-Subscription user_id, plan, status, trial_ends_at, provider_ref
-             evidence: pricing (3-day trial)
+Conversation id, kind (dm | group), title, avatar, pinned, last_message_at
+             evidence: S03 pinned section, previews, times
              confidence: high
+
+Member       conversation_id, member_type (user | agent), member_id, role
+             evidence: S03 group avatars, S04 Invite button
+             confidence: high
+
+Message      id, conversation_id, sender_type, sender_id, body (markdown),
+             attachments, artifact_id, mode ("Instant" ...), created_at
+             evidence: S04, S05
+             confidence: high
+
+Artifact     id, owner_id, kind (website | doc | slides | pdf | image | video |
+             audio | message), title, content or url, source_message_id,
+             starred, last_opened_at
+             evidence: S16 types, tabs, empty-state actions; S06 card
+             confidence: high
+
+WikiPage     id, owner_id, title, body (markdown), topic, tags[],
+             updated_at, created_by (user | agent)
+             evidence: S13 rows, topics, tags, "time ago"
+             confidence: high
+
+WikiLink     from_page_id, to_page_id
+             evidence: S13 graph edges, "links" and "unlinked" stats
+             confidence: high
+
+Automation   id, owner_id, template_id, agent_id, name, schedule (cron),
+             inputs (json), status (active | paused), last_run_at
+             evidence: S11 templates and "My automations"
+             confidence: medium (schedule fields are a guess)
+
+AutomationRun id, automation_id, started_at, status, output_message_id
+             confidence: guess
 ```
 
-Relationships: User 1-n Agent; Conversation n-n (User | Agent) via Member;
-Conversation 1-n Message; Conversation 1-n Task; Agent 1-n Task;
-Task 0-1 Artifact; User/Agent 1-n Memory; Conversation 1-n Invite;
-User 1-1 Subscription.
+Relationships: User 1-n Agent; AgentTeam n-n Agent; Conversation n-n
+(User | Agent) via Member; Conversation 1-n Message; Message 0-1 Artifact;
+User 1-n WikiPage; WikiPage n-n WikiPage via WikiLink; User 1-n Automation;
+Automation 1-n AutomationRun.
 
 ## Feature matrix
 
-See `features.csv`. Must: 13, should: 9, could: 8, skip: 4.
+See `features.csv`. Must: 13, should: 12, could: 9, skip: 6.
 
 ## Out of scope (cannot or should not be cloned)
 
-- Teamily's users and network (the "social network" part is its people).
-- Its agent catalogue, public agents and any partner connector deals.
-- Its models and model deals; a clone uses its own LLM provider and pays for it.
-- Its brand, name, logo, copy, mascot or illustrations.
-- Ad-supported credits on mobile (ad network deals).
+- Teamily's name, logo, mascot, agent illustrations, chat wallpaper and copy.
+  Draw or generate your own.
+- Its built-in agent catalogue as content (write your own agents and prompts).
+- Its users, public agents, partner connectors, model deals.
+- Billing, plans, trials, gifts and upsells: not needed for a tool only you
+  use.
+- Calls, meetings, office suite, Agent Hub, mobile and desktop apps.
 
 ## Size
 
-Screens 17 (12 in core scope), flows 7, entities 10.
+Screens 19 (10 seen), flows 8, entities 11.
 Hard parts:
-1. Realtime multi-party chat with agents streaming replies into a shared thread.
-2. Agent task runner: planning, step execution, concurrency limits, credits
-   metering, and keeping the plan card live while chat continues.
-3. Cross-chat memory with correct privacy (never leak group A's context into
-   group B for someone not in A).
-Also: per-plan limits and billing, invite links, file and voice uploads.
-Size: **L** for the core slice (a quarter for one developer). Adding studios,
-calls or the office suite pushes it to XL: rescope before starting those.
+1. Agents that produce real deliverables (a web page with a live preview)
+   and show them as cards in the chat.
+2. Memory: agents writing and updating linked wiki pages from conversations
+   without duplicating or contradicting themselves, plus the graph view.
+3. Automations: a scheduler that runs an agent on a timer and posts the
+   result back into a chat.
+For one owner it is much smaller than the public product: no multi-tenant
+access rules, no billing, no invite system. Size: **M** (a few weeks) for
+chat + directory + memory + artifacts; automations add a week or two.
 
-## Gaps to close (do these in your own account before /replica-architect)
+## Gaps to close
 
-1. Open https://teamily.ai/chat signed in and screenshot S03-S08, S10, S11
-   into `replica/screens/` (names `S03-chat-home.png` etc.). Check the terms of
-   service first for any ban on using an account to build a competing product.
-2. Record real routes and fix the "guess" rows above.
-3. Read the help center (source 6) and add any settings the screens miss.
-4. Count the real clicks for F01, F02, F05.
-5. Confirm whether memory has its own screen (S13).
+1. Screenshots still useful: S07 Agent workspace, S10 Create agent form,
+   S12 an automation's setup, S14 a memory page open, S15 Explore, the "+"
+   menu in S03, and the "Instant" mode dropdown.
+2. Check Teamily's terms of service for any ban on using your account to
+   build a competing tool (less of a concern for a private tool, but check).
