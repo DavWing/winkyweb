@@ -1,0 +1,1389 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Design primitives</title>
+<!-- Icons: Lucide (ISC licence), inlined. Copy is original. Tokens: tokens.css (generated). -->
+<link rel="stylesheet" href="tokens.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--tk-font-sans);font-size:var(--tk-text-sm);line-height:var(--tk-text-sm-line);color:var(--tk-text);background:var(--tk-surface)}
+h1{font-size:var(--tk-text-display);line-height:var(--tk-text-display-line);margin:0 0 4px}
+h2{font-size:var(--tk-text-lg);line-height:var(--tk-text-lg-line);font-weight:600;margin:40px 0 12px}
+.lead{color:var(--tk-text-secondary);margin:0 0 8px}
+.page{display:grid;grid-template-columns:var(--tk-rail) 1fr;min-height:100vh}
+main{padding:var(--tk-page-pad);max-width:1280px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.panel{background:var(--tk-bg);border-radius:var(--tk-radius-lg);padding:20px;box-shadow:var(--tk-shadow-card);max-width:100%;min-width:0}
+.label{font-size:var(--tk-text-xs);line-height:var(--tk-text-xs-line);font-weight:500;color:var(--tk-text-muted);display:block;margin-bottom:6px}
+:focus-visible{outline:2px solid var(--tk-focus);outline-offset:2px}
+/* rail */
+.rail{background:var(--tk-bg);border-right:1px solid var(--tk-border);display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 0;position:sticky;top:0;height:100vh}
+.logo{width:40px;height:40px;border-radius:var(--tk-radius-md);background:var(--tk-accent);color:var(--tk-on-accent);display:grid;place-items:center;font-weight:700;margin-bottom:12px}
+.rail-item{width:40px;height:40px;border-radius:var(--tk-radius-md);display:grid;place-items:center;color:var(--tk-text-muted);position:relative;text-decoration:none}
+.rail-item:hover{background:var(--tk-control);color:var(--tk-text)}
+.rail-item[aria-current=page]{background:var(--tk-accent-soft);color:var(--tk-accent-text)}
+.rail .spacer{flex:1}
+.badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:999px;background:var(--tk-danger);color:#fff;font-size:11px;font-weight:600;display:grid;place-items:center;padding:0 4px;border:2px solid var(--tk-bg)}
+.plan-label{font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--tk-text-muted)}
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:var(--tk-radius-pill);font:inherit;font-weight:600;cursor:pointer;height:40px;padding:0 16px;transition:background var(--tk-motion-fast) var(--tk-motion-ease)}
+.btn.sm{height:32px;padding:0 12px;font-size:var(--tk-text-sm)}
+.btn.lg{height:48px;padding:0 20px;font-size:var(--tk-text-base)}
+.primary{background:var(--tk-accent);color:var(--tk-on-accent)}.primary:hover,.primary.is-hover{background:var(--tk-accent-hover)}
+.secondary{background:var(--tk-control);color:var(--tk-text)}.secondary:hover,.secondary.is-hover{background:var(--tk-control-hover)}
+.ghost{background:transparent;color:var(--tk-text-secondary)}.ghost:hover,.ghost.is-hover{background:var(--tk-control);color:var(--tk-text)}
+.danger{background:var(--tk-danger);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.is-focus{outline:2px solid var(--tk-focus);outline-offset:2px}
+.icon-btn{width:40px;height:40px;border-radius:var(--tk-radius-md);border:0;background:transparent;color:var(--tk-text-secondary);display:inline-grid;place-items:center;cursor:pointer}
+.icon-btn:hover{background:var(--tk-control);color:var(--tk-text)}
+.fab{width:40px;height:40px;border-radius:999px;border:0;background:var(--tk-accent);color:var(--tk-on-accent);display:inline-grid;place-items:center;cursor:pointer}
+.spin{width:16px;height:16px;border-radius:999px;border:2px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* fields */
+.search{display:flex;align-items:center;gap:8px;background:var(--tk-control);border-radius:var(--tk-radius-pill);height:40px;padding:0 14px;color:var(--tk-text-muted);min-width:260px}
+.search.lg{height:48px;min-width:380px}
+.search input{border:0;background:transparent;font:inherit;color:var(--tk-text);outline:none;flex:1}
+.search input::placeholder{color:var(--tk-text-muted)}
+.search:focus-within{outline:2px solid var(--tk-focus);outline-offset:2px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:240px}
+.field span{font-weight:500}
+.input{height:40px;border:1px solid var(--tk-border-input);border-radius:var(--tk-radius-md);padding:0 12px;font:inherit;font-size:var(--tk-text-base);background:var(--tk-bg);color:var(--tk-text)}
+.input.is-focus{outline:2px solid var(--tk-focus);outline-offset:2px}
+.input[aria-invalid=true]{border-color:var(--tk-danger)}
+.err{color:var(--tk-danger);font-size:var(--tk-text-sm)}
+.input:disabled{background:var(--tk-control);color:var(--tk-text-muted)}
+/* chips & tabs */
+.chip{height:40px;padding:0 16px;border-radius:999px;border:0;background:var(--tk-control);color:var(--tk-text-secondary);font:inherit;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.chip:hover{background:var(--tk-control-hover)}
+.chip[aria-pressed=true]{background:var(--tk-accent);color:var(--tk-on-accent)}
+.chip.topic[aria-pressed=true]{background:var(--tk-accent-soft);color:var(--tk-accent-text)}
+.dot{width:8px;height:8px;border-radius:999px;background:var(--tk-graph-node)}
+.count{color:var(--tk-text-muted)}
+.tabs{display:flex;gap:28px;border-bottom:1px solid var(--tk-border)}
+.tab{background:none;border:0;font:inherit;font-size:var(--tk-text-base);padding:10px 0;color:var(--tk-text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected=true]{color:var(--tk-text);font-weight:600;border-color:var(--tk-accent)}
+.pill-tabs{display:flex;gap:8px}
+.pill-tab{height:40px;padding:0 16px;border-radius:999px;border:0;background:var(--tk-bg);color:var(--tk-text-secondary);font:inherit;font-weight:500;display:inline-flex;gap:8px;align-items:center;box-shadow:var(--tk-shadow-card)}
+.pill-tab[aria-selected=true]{background:var(--tk-accent);color:var(--tk-on-accent)}
+/* list */
+.section{display:flex;align-items:center;gap:6px;font-size:var(--tk-text-xs);font-weight:500;color:var(--tk-text-muted);background:none;border:0;padding:8px 16px;cursor:pointer}
+.conv-list{list-style:none;margin:0;padding:8px;background:var(--tk-surface-subtle);width:var(--tk-list);border-radius:var(--tk-radius-lg)}
+.conv{display:flex;gap:12px;align-items:center;height:80px;padding:0 12px;border-radius:var(--tk-radius-lg);text-decoration:none;color:inherit;border:1px solid transparent}
+.conv:hover{background:var(--tk-control)}
+.conv[aria-current=page]{background:var(--tk-accent-soft);border-color:var(--tk-accent-soft)}
+.conv .body{min-width:0;flex:1}
+.conv .top{display:flex;justify-content:space-between;gap:8px}
+.name{font-size:var(--tk-text-base);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
+.unread .name{font-weight:700}
+.time{font-size:var(--tk-text-xs);color:var(--tk-text-muted);flex:none}
+.preview{color:var(--tk-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.typing{color:var(--tk-accent-text)}
+.unread-count{background:var(--tk-accent);color:var(--tk-on-accent);border-radius:999px;font-size:11px;font-weight:600;min-width:20px;height:20px;display:inline-grid;place-items:center;padding:0 6px}
+.verified{color:var(--tk-accent-text);display:inline-flex}
+/* avatars */
+.av{flex:none;display:grid;place-items:center;font-weight:600;border-radius:999px;position:relative}
+.av.agent{border-radius:var(--tk-radius-md)}
+.av48{width:48px;height:48px}.av36{width:36px;height:36px}.av32{width:32px;height:32px;font-size:12px}.av64{width:64px;height:64px}
+.t-blue{background:var(--tk-tint-blue-bg);color:var(--tk-tint-blue-fg)}.t-cyan{background:var(--tk-tint-cyan-bg);color:var(--tk-tint-cyan-fg)}
+.t-orange{background:var(--tk-tint-orange-bg);color:var(--tk-tint-orange-fg)}.t-pink{background:var(--tk-tint-pink-bg);color:var(--tk-tint-pink-fg)}
+.t-purple{background:var(--tk-tint-purple-bg);color:var(--tk-tint-purple-fg)}.t-yellow{background:var(--tk-tint-yellow-bg);color:var(--tk-tint-yellow-fg)}
+.stack{display:flex}.stack .av{border:2px solid var(--tk-bg);margin-left:-10px}.stack .av:first-child{margin-left:0}
+/* chat */
+.thread{background:var(--tk-thread-bg);border-radius:var(--tk-radius-lg);padding:20px;display:flex;flex-direction:column;gap:16px}
+.msg{max-width:var(--tk-bubble-max);font-size:var(--tk-text-base);line-height:var(--tk-text-base-line)}
+.msg.own{align-self:flex-end;background:var(--tk-bubble-own);border-radius:var(--tk-radius-lg) var(--tk-radius-lg) var(--tk-radius-sm) var(--tk-radius-lg);padding:12px 16px}
+.msg.own.sending{opacity:.7}
+.agent-msg{display:flex;gap:12px;align-items:flex-start}
+.agent-msg .who{font-size:var(--tk-text-sm);font-weight:600;margin-bottom:6px}
+.agent-msg .msg{background:var(--tk-bg);border-radius:var(--tk-radius-sm) var(--tk-radius-lg) var(--tk-radius-lg) var(--tk-radius-lg);padding:12px 16px}
+.caret{display:inline-block;width:8px;height:18px;background:var(--tk-text);vertical-align:text-bottom;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.collapsed{max-height:96px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 55%,transparent)}
+.failed{display:flex;align-items:center;gap:8px;color:var(--tk-danger);font-size:var(--tk-text-sm);justify-content:flex-end}
+.system{align-self:center;font-size:var(--tk-text-xs);color:var(--tk-text-muted)}
+.plan{background:var(--tk-bg);border-radius:var(--tk-radius-lg);padding:16px;width:420px;box-shadow:var(--tk-shadow-card)}
+.plan header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:600}
+.status{font-size:var(--tk-text-xs);font-weight:600;border-radius:999px;padding:2px 10px}
+.st-run{background:var(--tk-accent-soft);color:var(--tk-accent-text)}.st-fail{background:var(--tk-danger-soft);color:var(--tk-danger)}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.steps li{display:flex;gap:8px;align-items:center}
+.steps .done{color:var(--tk-success)}.steps .pending{color:var(--tk-text-muted)}
+.plan footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--tk-text-muted);font-size:var(--tk-text-xs)}
+.artifact{width:440px;border-radius:var(--tk-radius-lg);overflow:hidden;background:var(--tk-bg);box-shadow:var(--tk-shadow-card)}
+.artifact .head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--tk-tint-cyan-bg);color:var(--tk-tint-cyan-fg)}
+.artifact .head a{color:var(--tk-text);font-weight:600;text-decoration:none;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kind{font-size:var(--tk-text-xs);font-weight:600;border-radius:999px;padding:1px 8px;background:var(--tk-bg);color:var(--tk-tint-cyan-fg)}
+.artifact .prev{aspect-ratio:16/9;background:linear-gradient(135deg,var(--tk-surface),var(--tk-control));display:grid;place-items:center;color:var(--tk-text-muted)}
+.skeleton{background:var(--tk-control);border-radius:var(--tk-radius-sm);height:12px;margin:6px 0}
+.composer{background:var(--tk-bg);border-radius:var(--tk-radius-xl);box-shadow:var(--tk-shadow-raised);padding:14px 16px 10px;min-height:var(--tk-composer-min);display:flex;flex-direction:column;gap:6px;max-width:880px}
+.composer textarea{border:0;resize:none;font:inherit;font-size:var(--tk-text-base);line-height:var(--tk-text-base-line);outline:none;min-height:40px;color:var(--tk-text)}
+.composer textarea::placeholder{color:var(--tk-text-muted)}
+.toolbar{display:flex;align-items:center;gap:2px}.toolbar .spacer{flex:1}
+.mode{display:inline-flex;align-items:center;gap:4px;color:var(--tk-text-muted);background:none;border:0;font:inherit;height:32px;padding:0 8px;border-radius:var(--tk-radius-md)}
+.mention{background:var(--tk-bg);border-radius:var(--tk-radius-md);box-shadow:var(--tk-shadow-pop);padding:4px;width:240px}
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tk-card-min),1fr));gap:var(--tk-grid-gap)}
+.card{background:var(--tk-bg);border-radius:var(--tk-radius-lg);box-shadow:var(--tk-shadow-card);padding:20px;display:flex;gap:16px;align-items:center;transition:box-shadow var(--tk-motion-base) var(--tk-motion-ease)}
+.card:hover,.card.is-hover{box-shadow:var(--tk-shadow-raised)}
+.card h3{margin:0 0 4px;font-size:var(--tk-text-base);line-height:var(--tk-text-base-line)}
+.card p{margin:0;color:var(--tk-text-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .grow{flex:1;min-width:0}
+.tcard{background:var(--tk-bg);border-radius:var(--tk-radius-lg);box-shadow:var(--tk-shadow-card);padding:24px;border:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.tcard:hover{box-shadow:var(--tk-shadow-raised)}
+.tcard .ico{width:40px;height:40px;border-radius:999px;background:var(--tk-accent-soft);color:var(--tk-accent-text);display:grid;place-items:center;margin-bottom:16px}
+.tcard strong{display:block;font-size:var(--tk-text-base);margin-bottom:6px}
+.tcard span{color:var(--tk-text-muted)}
+/* memory */
+.wiki{display:flex;gap:12px;padding:10px 12px;border-radius:var(--tk-radius-md);width:420px;max-width:100%}
+.wiki:hover{background:var(--tk-control)}.wiki.sel{background:var(--tk-accent-soft)}
+.wiki .doc{width:32px;height:32px;border-radius:999px;background:var(--tk-control);display:grid;place-items:center;color:var(--tk-text-secondary);flex:none}
+.wiki .t{font-size:var(--tk-text-base);font-weight:500}
+.wiki .ex{color:var(--tk-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wiki .meta{font-size:var(--tk-text-xs);color:var(--tk-text-muted)}
+.nav-item{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:var(--tk-radius-lg);width:300px}
+.nav-item.sel{background:var(--tk-accent-soft)}
+.nav-item .ic{width:40px;height:40px;border-radius:999px;display:grid;place-items:center;flex:none}
+.nav-item b{display:block;font-size:var(--tk-text-base)}.nav-item small{color:var(--tk-text-muted);font-size:var(--tk-text-xs)}
+dl.stats{display:flex;gap:40px;margin:0}
+dl.stats div{display:flex;flex-direction:column-reverse;align-items:center}
+dl.stats dd{margin:0;font-size:var(--tk-text-xl);line-height:var(--tk-text-xl-line);font-weight:700}
+dl.stats dt{font-size:var(--tk-text-xs);color:var(--tk-text-muted)}
+dl.stats .warn dd{color:var(--tk-warning)}
+/* overlays */
+.empty{max-width:600px;margin:0 auto;text-align:center}
+.empty .big{width:64px;height:64px;border-radius:999px;background:var(--tk-control);color:var(--tk-text-muted);display:grid;place-items:center;margin:0 auto 16px}
+.empty h3{font-size:var(--tk-text-xl);line-height:var(--tk-text-xl-line);margin:0 0 6px}
+.empty>p{color:var(--tk-text-secondary);margin:0 0 20px}
+.action{display:flex;align-items:center;gap:16px;background:var(--tk-bg);border-radius:var(--tk-radius-lg);padding:14px 16px;text-align:left;margin-top:12px;box-shadow:var(--tk-shadow-card)}
+.action .grow{flex:1}.action b{display:block;font-size:var(--tk-text-base)}.action small{color:var(--tk-text-muted);font-size:var(--tk-text-sm)}
+.menu{background:var(--tk-bg);border-radius:var(--tk-radius-md);box-shadow:var(--tk-shadow-pop);padding:4px;width:220px;list-style:none;margin:0}
+.menu li{height:36px;padding:0 12px;border-radius:var(--tk-radius-sm);display:flex;align-items:center;gap:10px}
+.menu li:hover,.menu li.hl{background:var(--tk-control)}
+.menu li.del{color:var(--tk-danger)}
+.toast{background:var(--tk-bg);border-radius:var(--tk-radius-md);box-shadow:var(--tk-shadow-pop);padding:12px 16px;border-left:3px solid var(--tk-success);width:320px;display:flex;gap:10px;align-items:center}
+.toast.err{border-left-color:var(--tk-danger)}
+.tooltip{background:var(--tk-text);color:var(--tk-bg);font-size:var(--tk-text-xs);border-radius:var(--tk-radius-sm);padding:4px 8px;display:inline-block;align-self:flex-start}
+.dialog{background:var(--tk-bg);border-radius:var(--tk-radius-lg);box-shadow:var(--tk-shadow-pop);padding:24px;width:480px}
+.dialog h3{margin:0 0 8px;font-size:var(--tk-text-lg)}
+.dialog p{color:var(--tk-text-secondary);margin:0 0 20px}
+.dialog .row{justify-content:flex-end}
+.swatch{width:140px;border-radius:var(--tk-radius-md);overflow:hidden;background:var(--tk-bg);box-shadow:var(--tk-shadow-card);font-size:var(--tk-text-xs)}
+.swatch div{height:44px}.swatch p{margin:0;padding:6px 8px}
+.conv-list,.plan,.artifact,.wiki,.nav-item,.dialog,.mention{max-width:100%}
+.search,.search.lg,.field{min-width:0;max-width:100%}
+@media (max-width:767px){
+ .page{grid-template-columns:minmax(0,1fr)}
+ main{padding:16px 16px 88px}
+ .rail{position:fixed;top:auto;bottom:0;left:0;right:0;height:64px;flex-direction:row;justify-content:space-around;border-right:0;border-top:1px solid var(--tk-border);padding:0 8px;z-index:10}
+ .rail .logo,.rail .spacer,.rail .plan-label,.rail-item.desk{display:none}
+ .grid{grid-template-columns:1fr}
+ .panel[style*="min-width"]{min-width:0!important}
+ .row>.panel{width:100%}
+ .search.lg{width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body><div class="page">
+<nav class="rail" aria-label="Main">
+  <div class="logo" aria-hidden="true">W</div>
+  <a class="rail-item" href="#" aria-current="page" aria-label="Chats"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-message-circle"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" />
+</svg></a>
+  <a class="rail-item" href="#" aria-label="Agents"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-bot"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 8V4H8" />
+  <rect width="16" height="12" x="4" y="8" rx="2" />
+  <path d="M2 14h2" />
+  <path d="M20 14h2" />
+  <path d="M15 13v2" />
+  <path d="M9 13v2" />
+</svg></a>
+  <a class="rail-item" href="#" aria-label="Automations"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-list-checks"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M13 5h8" />
+  <path d="M13 12h8" />
+  <path d="M13 19h8" />
+  <path d="m3 17 2 2 4-4" />
+  <path d="m3 7 2 2 4-4" />
+</svg></a>
+  <a class="rail-item desk" href="#" aria-label="Explore"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-compass"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z" />
+</svg></a>
+  <a class="rail-item" href="#" aria-label="Memory"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-brain"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 18V5" />
+  <path d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4" />
+  <path d="M17.598 6.5A3 3 0 1 0 12 5a3 3 0 1 0-5.598 1.5" />
+  <path d="M17.997 5.125a4 4 0 0 1 2.526 5.77" />
+  <path d="M18 18a4 4 0 0 0 2-7.464" />
+  <path d="M19.967 17.483A4 4 0 1 1 12 18a4 4 0 1 1-7.967-.517" />
+  <path d="M6 18a4 4 0 0 1-2-7.464" />
+  <path d="M6.003 5.125a4 4 0 0 0-2.526 5.77" />
+</svg></a>
+  <a class="rail-item" href="#" aria-label="Artifacts"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-layers"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" />
+  <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" />
+  <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" />
+</svg></a>
+  <a class="rail-item desk" href="#" aria-label="Contacts"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-user"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+  <circle cx="12" cy="7" r="4" />
+</svg></a>
+  <span class="spacer"></span>
+  <a class="rail-item desk" href="#" aria-label="Download apps"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-download"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 15V3" />
+  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+  <path d="m7 10 5 5 5-5" />
+</svg></a>
+  <a class="rail-item desk" href="#" aria-label="Language"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-globe"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+  <path d="M2 12h20" />
+</svg></a>
+  <span class="plan-label">PRIVATE</span>
+  <a class="rail-item" href="#" aria-label="Notifications, 4 new"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-bell"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+  <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />
+</svg><span class="badge">4</span></a>
+  <span class="av av36 t-purple" aria-label="Your profile">D</span>
+</nav>
+<main>
+<h1>Design primitives</h1>
+<p class="lead">Every component from components.md, built from tokens.css only. Accent and tints are placeholders until /replica-brand.</p>
+
+<h2>Colour roles</h2><div class="row"><div class="swatch"><div style="background:var(--tk-bg)"></div><p>bg</p></div><div class="swatch"><div style="background:var(--tk-surface)"></div><p>surface</p></div><div class="swatch"><div style="background:var(--tk-surface-subtle)"></div><p>surface-subtle</p></div><div class="swatch"><div style="background:var(--tk-control)"></div><p>control</p></div><div class="swatch"><div style="background:var(--tk-control-hover)"></div><p>control-hover</p></div><div class="swatch"><div style="background:var(--tk-border)"></div><p>border</p></div><div class="swatch"><div style="background:var(--tk-border-input)"></div><p>border-input</p></div><div class="swatch"><div style="background:var(--tk-text)"></div><p>text</p></div><div class="swatch"><div style="background:var(--tk-text-secondary)"></div><p>text-secondary</p></div><div class="swatch"><div style="background:var(--tk-text-muted)"></div><p>text-muted</p></div><div class="swatch"><div style="background:var(--tk-accent)"></div><p>accent</p></div><div class="swatch"><div style="background:var(--tk-accent-hover)"></div><p>accent-hover</p></div><div class="swatch"><div style="background:var(--tk-accent-soft)"></div><p>accent-soft</p></div><div class="swatch"><div style="background:var(--tk-accent-text)"></div><p>accent-text</p></div><div class="swatch"><div style="background:var(--tk-bubble-own)"></div><p>bubble-own</p></div><div class="swatch"><div style="background:var(--tk-thread-bg)"></div><p>thread-bg</p></div><div class="swatch"><div style="background:var(--tk-danger)"></div><p>danger</p></div><div class="swatch"><div style="background:var(--tk-danger-soft)"></div><p>danger-soft</p></div><div class="swatch"><div style="background:var(--tk-success)"></div><p>success</p></div><div class="swatch"><div style="background:var(--tk-warning)"></div><p>warning</p></div></div>
+<h2>Type scale</h2><div class="panel"><div style="font-size:var(--tk-text-display);line-height:var(--tk-text-display-line);font-weight:var(--tk-text-display-weight)">display · 你的智能工作空間 · The quick brown fox</div><div style="font-size:var(--tk-text-xl);line-height:var(--tk-text-xl-line);font-weight:var(--tk-text-xl-weight)">xl · 你的智能工作空間 · The quick brown fox</div><div style="font-size:var(--tk-text-lg);line-height:var(--tk-text-lg-line);font-weight:var(--tk-text-lg-weight)">lg · 你的智能工作空間 · The quick brown fox</div><div style="font-size:var(--tk-text-base);line-height:var(--tk-text-base-line);font-weight:var(--tk-text-base-weight)">base · 你的智能工作空間 · The quick brown fox</div><div style="font-size:var(--tk-text-sm);line-height:var(--tk-text-sm-line);font-weight:var(--tk-text-sm-weight)">sm · 你的智能工作空間 · The quick brown fox</div><div style="font-size:var(--tk-text-xs);line-height:var(--tk-text-xs-line);font-weight:var(--tk-text-xs-weight)">xs · 你的智能工作空間 · The quick brown fox</div></div>
+
+<h2>Buttons</h2>
+<div class="panel"><div class="row">
+ <button class="btn primary"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-plus"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M5 12h14" />
+  <path d="M12 5v14" />
+</svg>New agent</button>
+ <button class="btn primary is-hover">Hover</button>
+ <button class="btn primary is-focus">Focus</button>
+ <button class="btn primary" disabled>Disabled</button>
+ <button class="btn primary" aria-busy="true"><span class="spin"></span>Saving</button>
+ <button class="btn secondary">Invite</button>
+ <button class="btn ghost">Show less</button>
+ <button class="btn danger">Delete</button>
+ <button class="btn primary sm">Chat</button>
+ <button class="btn primary lg">Start</button>
+ <button class="icon-btn" aria-label="Search"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-search"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m21 21-4.34-4.34" />
+  <circle cx="11" cy="11" r="8" />
+</svg></button>
+ <button class="icon-btn" aria-label="More"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-ellipsis"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="1" />
+  <circle cx="19" cy="12" r="1" />
+  <circle cx="5" cy="12" r="1" />
+</svg></button>
+ <button class="fab" aria-label="New chat"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-plus"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M5 12h14" />
+  <path d="M12 5v14" />
+</svg></button>
+ <button class="fab" aria-label="Record voice"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-mic"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 19v3" />
+  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+  <rect x="9" y="2" width="6" height="13" rx="3" />
+</svg></button>
+</div></div>
+
+<h2>Fields</h2>
+<div class="panel"><div class="row" style="align-items:flex-end">
+ <label class="search"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-search"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m21 21-4.34-4.34" />
+  <circle cx="11" cy="11" r="8" />
+</svg><input type="search" placeholder="Search chats" aria-label="Search chats"></label>
+ <label class="search lg"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-search"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m21 21-4.34-4.34" />
+  <circle cx="11" cy="11" r="8" />
+</svg><input type="search" placeholder="Search agents…" aria-label="Search agents"></label>
+ <label class="field"><span>Agent name</span><input class="input" value="Launch planner"></label>
+ <label class="field"><span>Focused</span><input class="input is-focus" value="Brand voice"></label>
+ <label class="field"><span>Schedule</span><input class="input" aria-invalid="true" aria-describedby="e1" value="every blue moon"><small id="e1" class="err">Use a time like “weekdays at 08:30”.</small></label>
+ <label class="field"><span>Disabled</span><input class="input" disabled value="Locked"></label>
+</div></div>
+
+<h2>Chips and tabs</h2>
+<div class="panel" style="display:flex;flex-direction:column;gap:20px">
+ <div class="row" role="group" aria-label="Category"><button class="chip" aria-pressed="true">All</button><button class="chip" aria-pressed="false">Writing</button><button class="chip" aria-pressed="false">Research</button><button class="chip" aria-pressed="false">Engineering</button><button class="chip" aria-pressed="false">Finance</button><button class="chip" aria-pressed="false">Life</button></div>
+ <div class="row"><button class="chip topic" aria-pressed="true">All</button><button class="chip topic" aria-pressed="false"><span class="dot"></span>Onboarding <span class="count">3</span></button><button class="chip topic" aria-pressed="false"><span class="dot" style="background:var(--tk-graph-node-unlinked)"></span>Loose notes <span class="count">1</span></button></div>
+ <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true">Agents</button><button class="tab" role="tab" aria-selected="false">Agent teams</button></div>
+ <div class="pill-tabs" role="tablist"><button class="pill-tab" role="tab" aria-selected="false"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-layout-grid"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="7" height="7" x="3" y="3" rx="1" />
+  <rect width="7" height="7" x="14" y="3" rx="1" />
+  <rect width="7" height="7" x="14" y="14" rx="1" />
+  <rect width="7" height="7" x="3" y="14" rx="1" />
+</svg>Mine</button><button class="pill-tab" role="tab" aria-selected="true"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-briefcase"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+  <rect width="20" height="14" x="2" y="6" rx="2" />
+</svg>Work</button><button class="pill-tab" role="tab" aria-selected="false"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-house"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+  <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+</svg>Home</button></div>
+</div>
+
+<h2>Conversation list</h2>
+<div class="row" style="align-items:flex-start;gap:24px">
+<ul class="conv-list">
+ <li><button class="section" aria-expanded="true"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-pin"
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 17v5" />
+  <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+</svg>Pinned · 1 <svg aria-hidden="true" focusable="false"
+  class="lucide lucide-chevron-down"
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m6 9 6 6 6-6" />
+</svg></button></li>
+ <li><a class="conv" href="#"><span class="av av48 agent t-blue"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-sparkles"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+  <path d="M20 2v4" />
+  <path d="M22 4h-4" />
+  <circle cx="4" cy="20" r="2" />
+</svg></span><span class="body"><span class="top"><span class="name">Helper <span class="verified" aria-label="verified"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-badge-check"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+  <path d="m16 9-5.5 5.5L8 12" />
+</svg></span></span><span class="time">Sat</span></span><span class="preview">Ready when you are.</span></span></a></li>
+ <li><button class="section" aria-expanded="true"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-message-circle"
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" />
+</svg>Chats · 15 <svg aria-hidden="true" focusable="false"
+  class="lucide lucide-chevron-down"
+  xmlns="http://www.w3.org/2000/svg"
+  width="14"
+  height="14"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m6 9 6 6 6-6" />
+</svg></button></li>
+ <li><a class="conv" href="#" aria-current="page"><span class="av av48 agent t-orange"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-megaphone"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
+  <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14" />
+  <path d="M8 6v8" />
+</svg></span><span class="body"><span class="top"><span class="name">Social media planner</span><span class="time">22:42</span></span><span class="preview">Draft calendar for next week…</span></span></a></li>
+ <li><a class="conv unread" href="#"><span class="stack"><span class="av av32 agent t-cyan">A</span><span class="av av32 agent t-pink">B</span></span><span class="body"><span class="top"><span class="name">Ads team</span><span class="unread-count">2</span></span><span class="preview typing">typing…</span></span></a></li>
+ <li><a class="conv" href="#"><span class="av av48 agent t-yellow"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-plane"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
+</svg></span><span class="body"><span class="top"><span class="name">旅行規劃</span><span class="time">週六</span></span><span class="preview">東京五日行程已更新</span></span></a></li>
+</ul>
+<div style="display:flex;flex-direction:column;gap:16px">
+ <ul class="menu" role="menu"><li role="menuitem" class="hl"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-pin"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 17v5" />
+  <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+</svg>Pin chat</li><li role="menuitem"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-pencil"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+  <path d="m15 5 4 4" />
+</svg>Rename</li><li role="menuitem"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-bell-off"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M10.268 21a2 2 0 0 0 3.464 0" />
+  <path d="M17 17H4a1 1 0 0 1-.74-1.673C4.59 13.956 6 12.499 6 8a6 6 0 0 1 .258-1.742" />
+  <path d="m2 2 20 20" />
+  <path d="M8.668 3.01A6 6 0 0 1 18 8c0 2.687.77 4.653 1.707 6.05" />
+</svg>Mute</li><li role="menuitem" class="del"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-trash-2"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M10 11v6" />
+  <path d="M14 11v6" />
+  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+  <path d="M3 6h18" />
+  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+</svg>Delete</li></ul>
+ <span class="tooltip">Automations</span>
+ <div class="toast" role="status"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-circle-check"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <path d="m16 9-5.5 5.5L8 12" />
+</svg>Saved to Artifacts</div>
+ <div class="toast err" role="alert"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-circle-alert"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <line x1="12" x2="12" y1="8" y2="12" />
+  <line x1="12" x2="12.01" y1="16" y2="16" />
+</svg>Run failed. Retry from the chat.</div>
+</div>
+</div>
+
+<h2>Chat</h2>
+<div class="thread" role="log" aria-label="Messages">
+ <div class="msg own">Plan a two-week launch for our newsletter. Keep it simple and human, no corporate tone.</div>
+ <div class="msg own collapsed">For each idea explain: why would someone stop scrolling? Why does it fit the channel? How does it help people understand the product? Keep the style warm and a little playful. Avoid stock-photo visuals, neon gradients and abstract claims. Also list what we can reuse from last month and what needs new assets.</div>
+ <button class="btn ghost sm" style="align-self:flex-end"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-chevron-down"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m6 9 6 6 6-6" />
+</svg>Show more</button>
+ <div class="agent-msg"><span class="av av32 agent t-orange"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-megaphone"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
+  <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14" />
+  <path d="M8 6v8" />
+</svg></span><div><div class="who">Social media planner</div>
+   <div class="msg">Here is the plan. Week one builds curiosity, week two shows the product in use<span class="caret" aria-hidden="true"></span></div></div></div>
+ <div class="agent-msg"><span class="av av32 agent t-orange"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-megaphone"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
+  <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14" />
+  <path d="M8 6v8" />
+</svg></span><div class="plan" aria-live="polite">
+   <header><span>Building the launch page</span><span class="status st-run">Running</span></header>
+   <ul class="steps"><li class="done"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-circle-check"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <path d="m16 9-5.5 5.5L8 12" />
+</svg>Read the brief and memory</li><li class="done"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-circle-check"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <path d="m16 9-5.5 5.5L8 12" />
+</svg>Outline sections</li><li><span class="spin"></span>Write the page</li><li class="pending"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-circle"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+</svg>Check links and layout</li></ul>
+   <footer><span>1 min 12 s</span><button class="btn ghost sm">Cancel</button></footer></div></div>
+ <div class="agent-msg"><span class="av av32 agent t-orange"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-megaphone"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
+  <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14" />
+  <path d="M8 6v8" />
+</svg></span><div class="artifact">
+   <div class="head"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-file-code"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  <path d="M10 12.5 8 15l2 2.5" />
+  <path d="m14 12.5 2 2.5-2 2.5" />
+</svg><a href="#">Newsletter launch page</a><span class="kind">WEB</span><button class="icon-btn" aria-label="Copy link" style="width:32px;height:32px"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-link"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+</svg></button></div>
+   <div class="prev"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-maximize-2"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M15 3h6v6" />
+  <path d="m21 3-7 7" />
+  <path d="m3 21 7-7" />
+  <path d="M9 21H3v-6" />
+</svg></div></div></div>
+ <div class="agent-msg"><span class="av av32 agent t-orange"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-megaphone"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
+  <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14" />
+  <path d="M8 6v8" />
+</svg></span><div class="artifact"><div class="head"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-file-text"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  <path d="M10 9H8" />
+  <path d="M16 13H8" />
+  <path d="M16 17H8" />
+</svg><a href="#">Generating…</a><span class="kind">DOC</span></div><div style="padding:16px"><div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:60%"></div><div class="skeleton" style="width:70%"></div></div></div></div>
+ <div class="msg own sending">Can you add a referral offer?</div>
+ <div class="failed"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-circle-alert"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <line x1="12" x2="12" y1="8" y2="12" />
+  <line x1="12" x2="12.01" y1="16" y2="16" />
+</svg>Not sent <button class="btn ghost sm">Retry</button></div>
+ <div class="system">Ads team was added to this chat</div>
+ <div class="mention"><ul class="menu" role="listbox" aria-label="Mention an agent" style="box-shadow:none;width:auto"><li role="option" aria-selected="true" class="hl"><span class="av av32 agent t-orange" style="width:24px;height:24px">S</span>Social media planner</li><li role="option" aria-selected="false"><span class="av agent t-cyan" style="width:24px;height:24px">R</span>Researcher</li></ul></div>
+ <div class="composer">
+   <textarea aria-label="Message Social media planner" placeholder="Message Social media planner…" rows="2"></textarea>
+   <div class="toolbar" role="toolbar" aria-label="Composer">
+     <button class="icon-btn" aria-label="Attach"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-plus"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M5 12h14" />
+  <path d="M12 5v14" />
+</svg></button><button class="icon-btn" aria-label="Tools"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-wrench"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z" />
+</svg></button><button class="icon-btn" aria-label="Connectors"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-plug"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 22v-5" />
+  <path d="M15 8V2" />
+  <path d="M17 8a1 1 0 0 1 1 1v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1z" />
+  <path d="M9 8V2" />
+</svg></button>
+     <span class="spacer"></span>
+     <button class="mode" aria-haspopup="listbox">Fast <svg aria-hidden="true" focusable="false"
+  class="lucide lucide-chevron-down"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m6 9 6 6 6-6" />
+</svg></button>
+     <button class="icon-btn" aria-label="Improve prompt"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-sparkles"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+  <path d="M20 2v4" />
+  <path d="M22 4h-4" />
+  <circle cx="4" cy="20" r="2" />
+</svg></button><button class="icon-btn" aria-label="Emoji"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-smile"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M15 10V9" />
+  <path d="M16.472 15a6 6 0 01-8.943 0" />
+  <path d="M9 10V9" />
+  <circle cx="12" cy="12" r="10" />
+</svg></button>
+     <button class="fab" aria-label="Record voice"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-mic"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 19v3" />
+  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+  <rect x="9" y="2" width="6" height="13" rx="3" />
+</svg></button>
+   </div></div>
+</div>
+
+<h2>Cards</h2>
+<div class="grid">
+ <article class="card"><span class="av av64 t-blue"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-code"
+  xmlns="http://www.w3.org/2000/svg"
+  width="28"
+  height="28"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="m16 18 6-6-6-6" />
+  <path d="m8 6-6 6 6 6" />
+</svg></span><div class="grow"><h3>Frontend helper</h3><p>Builds and reviews React and CSS, explains trade-offs in plain words.</p></div><button class="btn primary sm" aria-label="Chat with Frontend helper">Chat</button></article>
+ <article class="card is-hover"><span class="av av64 t-yellow"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-pen-line"
+  xmlns="http://www.w3.org/2000/svg"
+  width="28"
+  height="28"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M13 21h8" />
+  <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+</svg></span><div class="grow"><h3>Copy editor</h3><p>Tightens drafts, keeps your voice, flags anything unclear or too long for the channel.</p></div><button class="btn primary sm" aria-label="Chat with Copy editor">Chat</button></article>
+ <article class="card"><span class="av av64 t-pink"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-chart-line"
+  xmlns="http://www.w3.org/2000/svg"
+  width="28"
+  height="28"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+  <path d="m19 9-5 5-4-4-3 3" />
+</svg></span><div class="grow"><h3>Numbers checker</h3><p>Reads a spreadsheet and tells you what changed.</p></div><button class="btn primary sm" aria-label="Chat with Numbers checker">Chat</button></article>
+</div>
+<div class="grid" style="margin-top:24px">
+ <button class="tcard"><span class="ico"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-sunrise"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12 2v8" />
+  <path d="m4.93 10.93 1.41 1.41" />
+  <path d="M2 18h2" />
+  <path d="M20 18h2" />
+  <path d="m19.07 10.93-1.41 1.41" />
+  <path d="M22 22H2" />
+  <path d="m8 6 4-4 4 4" />
+  <path d="M16 18a4 4 0 0 0-8 0" />
+</svg></span><strong>Morning summary</strong><span>Every weekday: what moved, what is due, what looks risky.</span></button>
+ <button class="tcard"><span class="ico"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-eye"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+  <circle cx="12" cy="12" r="3" />
+</svg></span><strong>Watch a competitor</strong><span>Checks their site and tells you when something changes.</span></button>
+ <button class="tcard"><span class="ico"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-inbox"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+  <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+</svg></span><strong>Inbox triage</strong><span>Sorts new mail and lists what needs your reply.</span></button>
+</div>
+
+<h2>Memory</h2>
+<div class="row" style="align-items:flex-start;gap:24px">
+ <div class="panel" style="padding:8px">
+  <div class="nav-item sel"><span class="ic" style="background:var(--tk-tint-pink-bg);color:var(--tk-tint-pink-fg)"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-layout-grid"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect width="7" height="7" x="3" y="3" rx="1" />
+  <rect width="7" height="7" x="14" y="3" rx="1" />
+  <rect width="7" height="7" x="14" y="14" rx="1" />
+  <rect width="7" height="7" x="3" y="14" rx="1" />
+</svg></span><span><b>Overview</b><small>Every page and how they link</small></span></div>
+  <div class="nav-item"><span class="ic t-cyan"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-circle-user"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <circle cx="12" cy="10" r="3" />
+  <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" />
+</svg></span><span><b>About me</b><small>Work and life notes</small></span></div>
+  <div class="nav-item"><span class="ic t-yellow"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-calendar-clock"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M16 14v2.2l1.6 1" />
+  <path d="M16 2v3" />
+  <path d="M21 7.338V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h2.338" />
+  <path d="M3 9h5.859" />
+  <path d="M8 2v3" />
+  <circle cx="16" cy="16" r="6" />
+</svg></span><span><b>Coming up</b><small>Next actions</small></span></div>
+  <div class="nav-item"><span class="ic t-purple"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-package"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
+  <path d="M12 22V12" />
+  <polyline points="3.29 7 12 12 20.71 7" />
+  <path d="m7.5 4.27 9 5.15" />
+</svg></span><span><b>Made by agents</b><small>All outputs</small></span></div>
+ </div>
+ <div class="panel" style="padding:8px">
+  <div class="wiki sel"><span class="doc"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-file-text"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  <path d="M10 9H8" />
+  <path d="M16 13H8" />
+  <path d="M16 17H8" />
+</svg></span><span style="min-width:0"><span class="t">How this wiki works</span><div class="ex">Pages build themselves from your chats; you can edit any of them.</div><span class="meta">22 min ago · #wiki #start</span></span></div>
+  <div class="wiki"><span class="doc"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-file-text"
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  <path d="M10 9H8" />
+  <path d="M16 13H8" />
+  <path d="M16 17H8" />
+</svg></span><span style="min-width:0"><span class="t">Newsletter voice</span><div class="ex">Warm, short sentences, one idea per post.</div><span class="meta">2 days ago · #brand</span></span></div>
+ </div>
+ <div class="panel"><dl class="stats"><div><dt>pages</dt><dd>4</dd></div><div><dt>links</dt><dd>1</dd></div><div class="warn"><dt>unlinked</dt><dd>2</dd></div><div><dt>topics</dt><dd>2</dd></div></dl></div>
+</div>
+
+<h2>Empty state and dialog</h2>
+<div class="row" style="align-items:flex-start;gap:40px">
+ <div class="panel" style="flex:1;min-width:420px;background:var(--tk-surface-subtle)"><div class="empty">
+  <div class="big"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-layers"
+  xmlns="http://www.w3.org/2000/svg"
+  width="28"
+  height="28"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" />
+  <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" />
+  <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" />
+</svg></div><h3>Nothing saved yet</h3><p>Pages, docs and messages you keep will show up here.</p>
+  <div class="action"><span class="av av48 t-blue"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-file-text"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  <path d="M10 9H8" />
+  <path d="M16 13H8" />
+  <path d="M16 17H8" />
+</svg></span><span class="grow"><b>Blank doc</b><small>Start writing from scratch.</small></span><button class="fab" aria-label="Create a blank doc"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-arrow-up-right"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M7 7h10v10" />
+  <path d="M7 17 17 7" />
+</svg></button></div>
+  <div class="action"><span class="av av48" style="background:var(--tk-accent-soft);color:var(--tk-accent-text)"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-globe"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+  <path d="M2 12h20" />
+</svg></span><span class="grow"><b>Ask an agent for a page</b><small>Describe it; an agent builds it.</small></span><button class="fab" aria-label="Ask an agent for a page"><svg aria-hidden="true" focusable="false"
+  class="lucide lucide-arrow-up-right"
+  xmlns="http://www.w3.org/2000/svg"
+  width="20"
+  height="20"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M7 7h10v10" />
+  <path d="M7 17 17 7" />
+</svg></button></div>
+ </div></div>
+ <div class="dialog" role="dialog" aria-labelledby="dt"><h3 id="dt">Delete “Ads team”?</h3><p>The chat and its messages go. Pages the agents made stay in Artifacts.</p><div class="row"><button class="btn secondary">Keep</button><button class="btn danger">Delete chat</button></div></div>
+</div>
+</main></div></body></html>
